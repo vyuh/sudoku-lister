@@ -161,7 +161,7 @@ int hook(d00d *puzl) {
 int crook(d00d *master) {
     d00d *copy;
     b8 *mc, *cc;
-    b8 pos, val=0;
+    b8 pos, val=0, dummy;
     if(!(copy=(d00d *)malloc(sizeof(d00d)))) {
         fputs("crook: RAM denied, 0", stderr);
         exit(0);
@@ -176,8 +176,7 @@ int crook(d00d *master) {
         if(squash(copy)){
             rm(mc,val);
             /* should i check? :\ */
-            if(idea(master, &pos, &pos)) {
-            /* dummies passed except first arg */
+            if(idea(master, &pos, &dummy)&&(dummy>val)) {
                 free(copy);
                 return 1;
             }  
