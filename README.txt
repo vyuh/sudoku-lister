@@ -65,7 +65,7 @@ faster than me. :D
 
 please point out if it does not work as exhibited. i will correct it.
 
-i am in search of a computer with enough resouces to undertake the task
+i am in search of a computer with enough resources to undertake the task
 of histogramming all sudokus.
 
 or should i make a distributed system!?
