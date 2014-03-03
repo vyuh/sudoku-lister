@@ -3,13 +3,13 @@ constraints of an input sudoku grid.
 
 __EXAMPLES__
 $ cc sud.c #single file having complete source
-$ ./a.out 800000000003600000070090200050007000000045700000100030001000068008500010090000400
 $ ./a.out #press control C to dump state and terminate program
 $ date>>log; ./a.out;date >>log;tail log #time the computation
+$ ./a.out 800000000003600000070090200050007000000045700000100030001000068008500010090000400
 
 __USES__
 it can be used in mathematical exploration of properties of sudoku.
-or as a fast sudoku solver/generator.
+or as a *very* fast sudoku solver/generator.
 
 __INPUT__
 input grid is given as a string of 81 bytes as first argument.
@@ -20,10 +20,10 @@ cells are assumed to be empty.
 
 __OUTPUT__
 the program lists sudokus in form of 81 character strings.
-all of which satisfy the constraints expressed in the input string.
+*all* of which satisfy the constraints expressed in the input string.
 
 if input string means all empty cells.
-it will list all possible sudoku grids
+it will list *all* possible sudoku grids
 
 if no input string is given.
 it will list all sudokus which have 123456789 as the first row.
@@ -47,7 +47,7 @@ values in whole computation.
 the counter will not overflow for any input string.
 
 __PORTABILITY__
-the source code and any generated dump files are usable on any
+the source code and any generated dump files are usable on *any*
 platform that has an ANSI C compiler with standard C library
 implemented.
 
