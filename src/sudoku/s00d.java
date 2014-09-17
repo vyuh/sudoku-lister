@@ -10,38 +10,41 @@ class s00d {
             0x0100, 0x0080, 0x0040
         };
         static final short data=0xf;
-        cell() {
-            v=0x7fe7;
+        cell() { 
+            v=0x7fe7; //may_be_0..8 wait !open 9_probables_left
         }
-        cell(char i) {
+        cell(char i) { // may be only the given value, open, and the value
             short idea_v;
             idea_v=(short)i-(short)'1';
             if((idea_v<9)&&(idea_v>=0)) v = idea_v|open|may_b[idea_v];
             else this();
         }
-        String txt() {
+        String txt() { //for non semantic dump. though portable.
             return ""+v;
         }
-        boolean yo(short mask) {
+        boolean yo(short mask) { //the mask set or not
             if((v&mask)!=0) return true;
             else return false;
         }
-        short value(){
+        void reset(short mask) { //reset the mask
+            v&=~mask;
+        }
+        short value(){ //value of an open or filled cell
             return (short)(v&data);
         }
-        boolean rm(short i) {
-            if (yo(may_b[i])) {
-                if (!yo(wait)) return true;
+        boolean rm(byte i) { // returns success or failure (false or true respectively)
+            if (yo(may_b[i])) { //has it in probable
+                if (!yo(wait)) return true; // it is the only probable!!
                 v&=~may_b[i];
                 v--;
-                if(yo(open)) {
+                if(yo(open)) {// only one probable left now
                     for(i=0; i<9; i++) if(yo(may_b[i])) break;
                     v = i|open|may_b[i];
                 }
             }
-            return false;
+            return false; //removed ok
         }
-        short trial(short i) {
+        short trial(short i) { // returns trial value or >=9 if no trial available
             for(; i<9; i++) if(yo(may_b[i])) break;
             return i;
         }
@@ -131,11 +134,12 @@ class s00d {
         { 60, 61, 62, 34, 70, 72, 74, 76, 78, 80, 43, 25, 71, 69, 52, 7, 75, 77, 73, 16 },
         { 60, 8, 62, 17, 35, 70, 72, 74, 76, 78, 44, 53, 69, 71, 73, 75, 77, 79, 61, 26 }
     };
-    int first() {
+    int first() { // first waiting cell or >=81
         for(int i = 0; i<81; i++) if(i_v[i].yo(wait)) break;
         return i;
     }
-    int idea() {
+    //TODO add int best() { // best waiting cell.
+    int idea() { //first open cell or >=81
         for (int i=0; i<81; i++) if (i_v[i].yo(open)) break;
         return i;
     }
@@ -143,34 +147,34 @@ class s00d {
 
 b8 out[83]="";
 iint *cnt;
-int hook(s00d *puzl) {
-    b8 x;
-    b8 *eye; 
-    b8 pos, val;
-    if(d.stack) {
-        if(d.top) return 0;
-        free(d.stack);
-	d.stack=0;
-	d.top=-1;
-        return 1;
-    }
-    while(idea(puzl, &pos, &val)) {
-        for(x=0, eye=&clr[pos*20]; x<20; x++, eye++) {       
-             if(rm(&(puzl->i_v[*eye]), val)) return -1;
+    int hook() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
+        byte x;
+        byte pos, val;
+        /* if(d.stack) {
+            if(d.top) return 0;
+            free(d.stack);
+	    d.stack=0;
+	    d.top=-1;
+            return 1;
+        } */ // TODO implement dump feature via exception handling ^C
+        while((pos = idea()) < 81) {
+            val = i_v[pos].value();
+            for(x=0; x<20; x++) {       
+                 if(i_v[clr[pos][x]].rm(val)) return -1;
+            }
+            i_v[pos].reset(open);
+            if (--left == 0) {
+                STR(out,puzl);
+                fputs(out ,stdout);
+                add(cnt,1L); //cant possibly overflow, should i check?
+                if(d.buf){
+		    d.pos=0;
+                    return 2; //dump state
+                } else return 1;
+            }
         }
-        puzl->i_v[pos]&=(~open);
-        if (!(--(puzl->left))) {
-            STR(out,puzl);
-            fputs(out ,stdout);
-            add(cnt,1L); //cant possibly overflow, should i check?
-            if(d.buf){
-		d.pos=0;
-                return 2;
-            } else return 1;
-        }
+        return 0;
     }
-    return 0;
-}
 int crook(s00d *master) {
     s00d *copy;
     b16 *mc, *cc;
