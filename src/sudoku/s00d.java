@@ -142,12 +142,29 @@ class s00d {
         { 60, 61, 62, 34, 70, 72, 74, 76, 78, 80, 43, 25, 71, 69, 52, 7, 75, 77, 73, 16 },
         { 60, 8, 62, 17, 35, 70, 72, 74, 76, 78, 44, 53, 69, 71, 73, 75, 77, 79, 61, 26 }
     };
-    byte first() { // first waiting cell or >=81
+    byte first() { // first waiting cell or >=81; for ordered listing of solutions
         byte i = 0;
         for(; i<81; i++) if(i_v[i].yo(cell.wait)) break;
         return i;
     }
-    //TODO add int best() { // best waiting cell.
+    byte best() { // best waiting cell or >=81; first() substitute for fast first convergence
+        byte i=0, level=9, b=81;
+        for(; i<81; i++) {
+            if(i_v[i].yo(cell.wait)) {
+                if(i_v[i].value()<level) {
+                    level=(byte)i_v[i].value();
+                    b=x;
+                }
+            }
+        }
+        return b;
+    }
+    /*  returns the cell with minimum 
+        number of probables
+        converges to a solution faster
+        than selecting the first empty cell
+    */
+    
     byte idea() { //first open cell or >=81
         byte i = 0;
         for (; i<81; i++) if (i_v[i].yo(cell.open)) break;
