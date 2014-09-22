@@ -1,54 +1,62 @@
 package sudoku;
-class s00d {
-    class cell {
-        short v;
-        static final short wait=0x20;
-        static final short open=0x10;
-        static final short[] may_b={
-            0x4000, 0x2000, 0x1000,
-            0x0800, 0x0400, 0x0200,
-            0x0100, 0x0080, 0x0040
-        };
-        static final short data=0xf;
-        cell() { 
-            v=0x7fe7; //may_be_0..8 wait !open 9_probables_left
-        }
-        cell(char i) { // may be only the given value, open, and the value
-            short idea_v;
-            idea_v=(short)i-(short)'1';
-            if((idea_v<9)&&(idea_v>=0)) v = idea_v|open|may_b[idea_v];
-            else this();
-        }
-        String txt() { //for non semantic dump. though portable.
-            return ""+v;
-        }
-        boolean yo(short mask) { //the mask set or not
-            if((v&mask)!=0) return true;
-            else return false;
-        }
-        void reset(short mask) { //reset the mask
-            v&=~mask;
-        }
-        short value(){ //value of an open or filled cell
-            return (short)(v&data);
-        }
-        boolean rm(byte i) { // returns success or failure (false or true respectively)
-            if (yo(may_b[i])) { //has it in probable
-                if (!yo(wait)) return true; // it is the only probable!!
-                v&=~may_b[i];
-                v--;
-                if(yo(open)) {// only one probable left now
-                    for(i=0; i<9; i++) if(yo(may_b[i])) break;
-                    v = i|open|may_b[i];
-                }
-            }
-            return false; //removed ok
-        }
-        short trial(short i) { // returns trial value or >=9 if no trial available
-            for(; i<9; i++) if(yo(may_b[i])) break;
-            return i;
-        }
+class cell {
+    short v;
+    final static short wait=0x20;
+    final static short open=0x10;
+    final static short[] may_b={
+        0x4000, 0x2000, 0x1000,
+        0x0800, 0x0400, 0x0200,
+        0x0100, 0x0080, 0x0040
+    };
+    final static short data=0xf;
+    cell() { 
+        v=0x7fe7; //may_be_0..8 wait !open 9_probables_left
     }
+    cell(char i) { // may be only the given value, open, and the value
+        byte idea=(byte)((short)i-(short)'1');
+        if((idea<9)&&(idea>=0)) putIdea(idea);
+        else v = 0x7fe7;
+    }
+    cell(cell template){
+        v = template.v;
+    }
+    void putIdea(byte idea){
+        v=(short)(idea|open|may_b[idea]);
+    }
+    void copyin(cell template){
+        v=template.v;
+    }
+    String txt() { //for non semantic dump. though portable.
+        return ""+v;
+    }
+    boolean yo(short mask) { //the mask set or not
+        if((v&mask)!=0) return true;
+        else return false;
+    }
+    void reset(short mask) { //reset the mask
+        v&=~mask;
+    }
+    byte value(){ //value of an open or filled cell
+        return (byte)(v&data);
+    }
+    boolean rm(byte i) { // returns success or failure (false or true respectively)
+        if (yo(may_b[i])) { //has it in probable
+            if (!yo(wait)) return true; // it is the only probable!!
+            v&=~may_b[i];
+            v--;
+            if(yo(open)) {// only one probable left now
+                for(i=0; i<9; i++) if(yo(may_b[i])) break;
+                v = (short)(i|open|may_b[i]);
+            }
+        }
+        return false; //removed ok
+    }
+    byte trial(byte i) { // returns trial value or >=9 if no trial available
+        for(; i<9; i++) if(yo(may_b[i])) break;
+        return i;
+    }
+}
+class s00d {
     cell[] i_v;
     byte left;
     static final byte[][] clr={
@@ -134,22 +142,30 @@ class s00d {
         { 60, 61, 62, 34, 70, 72, 74, 76, 78, 80, 43, 25, 71, 69, 52, 7, 75, 77, 73, 16 },
         { 60, 8, 62, 17, 35, 70, 72, 74, 76, 78, 44, 53, 69, 71, 73, 75, 77, 79, 61, 26 }
     };
-    int first() { // first waiting cell or >=81
-        for(int i = 0; i<81; i++) if(i_v[i].yo(wait)) break;
+    byte first() { // first waiting cell or >=81
+        byte i = 0;
+        for(; i<81; i++) if(i_v[i].yo(cell.wait)) break;
         return i;
     }
     //TODO add int best() { // best waiting cell.
-    int idea() { //first open cell or >=81
-        for (int i=0; i<81; i++) if (i_v[i].yo(open)) break;
+    byte idea() { //first open cell or >=81
+        byte i = 0;
+        for (; i<81; i++) if (i_v[i].yo(cell.open)) break;
         return i;
+    }
+    public String toString(){
+        byte i;
+        StringBuilder buf = new StringBuilder(81);
+        for (i=0; i<81; i++) {
+            if (i_v[i].yo(cell.open)) buf.append('?');
+            else buf.append(1+i_v[i].value());
+        }
+        return buf.toString();
     }
 
 
-b8 out[83]="";
-iint *cnt;
     int hook() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
-        byte x;
-        byte pos, val;
+        byte x, pos, val;
         /* if(d.stack) {
             if(d.top) return 0;
             free(d.stack);
@@ -162,90 +178,89 @@ iint *cnt;
             for(x=0; x<20; x++) {       
                  if(i_v[clr[pos][x]].rm(val)) return -1;
             }
-            i_v[pos].reset(open);
+            i_v[pos].reset(cell.open);
             if (--left == 0) {
-                STR(out,puzl);
-                fputs(out ,stdout);
-                add(cnt,1L); //cant possibly overflow, should i check?
-                if(d.buf){
+                System.out.println(toString());
+                return 1;
+              //TODO implement counting later  add(cnt,1L); /*cant possibly overflow, should i check?*/
+              /*TODO implement dump feature  if(d.buf){
 		    d.pos=0;
                     return 2; //dump state
                 } else return 1;
+              */
             }
         }
         return 0;
     }
-int crook(s00d *master) {
-    s00d *copy;
-    b16 *mc, *cc;
-    b8 pos, val=0, dummy;
-    if(d.stack){
-	if(!d.top--) die("stack underflow");
-        copy=(d.stack+d.top)->s;
-	pos=(b8)(d.stack+d.top)->p;
-	val=(b8)(d.stack+d.top)->v;
-        mc=&master->i_v[pos];
-        cc=&copy->i_v[pos];
-    } else {
-        if(!(copy=(s00d *)malloc(sizeof(s00d)))) die("RAM denied\n");
-        if(first(master, &pos)) {
+    int crook(){
+        s00d copy;
+        cell mc, cc;
+        byte pos, val=0;
+        /*TODO implement dumper
+        if(d.stack){
+            if(!d.top--) die("stack underflow");
+            copy=(d.stack+d.top)->s;
+            pos=(b8)(d.stack+d.top)->p;
+            val=(b8)(d.stack+d.top)->v;
             mc=&master->i_v[pos];
             cc=&copy->i_v[pos];
-        } else return 1;
-    }
-    while(d.stack||trial(mc, &val)) {
-        if(!d.stack){
-            *copy=*master;
-            *cc=(((b16)val)|open|may_b[val]);
-        }
-        switch(squash(copy)){
-            case 1:
-	    val++;
-	    break;
-            case 2:
-	    d.pos+=dmp(copy, (int)pos, (int)val);
-            return 2;
-            case -1:
-            rm(mc,val);
-            /* should i check? */
-            if(idea(master, &pos, &dummy)&&(dummy>val)) {
-                free(copy);
-                return 0;
+        } else {
+        */
+            copy = new s00d(this); //TODO make this deep copy constructor
+            if((pos=first())<81) {
+                mc=i_v[pos];
+                cc=copy.i_v[pos];
+            } else return 1;
+        /* TODO implement dumper }
+        while(d.stack||trial(mc, &val)) { 
+            if(!d.stack){
+        */
+            while((val=mc.trial(val))<9){
+                copy.copyin(this);
+                cc.putIdea(val);
+        //    }
+                switch(copy.squash()){
+                    case 1:
+                    val++;
+                    break;
+                    /* TODO implement dumper 
+                    case 2:
+                    d.pos+=dmp(copy, (int)pos, (int)val);
+                    return 2;
+                    */
+                    case -1:
+                    mc.rm(val); /* should i check? */
+                    if(((pos = idea())<81)&&(i_v[pos].value()>val)) {
+                        copy = null;
+                        return 0;
+                    }
+                }
             }
-        }
+        copy = null;
+        return 1;
     }
-    free(copy);
-    return 1;
-}
-int squash(s00d *puzl){
-    int ret;
-    do if(ret=hook(puzl)) return ret; while (!(ret=crook(puzl)));
-    return ret;
-}
-void S00D(b8 *in, s00d *puzl) {
-    b16 *eye, idea_v;
-    b8 i;
-    puzl->left = 81;
-    eye = puzl->i_v;
-    for(i=0; i<81 && *in; i++, eye++, in++) {
-        if((idea_v=(*in)-'1')<9) *eye = idea_v|open|may_b[idea_v];
-        else *eye = 0x7fe7;
+    int squash(){
+        int ret;
+        do if((ret=hook())!=0) return ret; while (0==(ret=crook()));
+        return ret;
     }
-    for(;i<81;i++,eye++) *eye = 0x7fe7;
-}
     s00d(String in) {
-        short idea_v, eye;
-         byte i;
-
-void STR(b8 *buf, s00d *puzl) {
-    b16 *sun;
-    b8 *eye;
-    b8 i;
-    eye=buf;
-    for (sun=puzl->i_v, i=0; i<81; i++, sun++, eye++) {
-        if ((*sun) & open) *eye = '?';
-        else *eye = (b8)('1' + ((*sun) & data));
+        byte i;
+        int len = in.length();
+        left = 81;
+        i_v = new cell[81];
+        for(i=0; i<len && i<81; i++) {
+            i_v[i] = new cell(in.charAt(i));
+        }
+        for(;i<81;i++) i_v[i] = new cell();
     }
-    *eye = '\n';
-    *(++eye) = '\0';
+    s00d(s00d template){
+        left = template.left;
+        i_v = new cell[81];
+        for(byte i = 0; i<81; i++) i_v[i] = new cell(template.i_v[i]);
+    }
+    void copyin(s00d template){
+        left = template.left;
+        for(byte i = 0; i<81; i++) i_v[i].copyin(template.i_v[i]);
+    }
 }

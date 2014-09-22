@@ -1,4 +1,22 @@
-#include "sud_squash.c"
+package sudoku;
+class lister {
+    final static String def = "123456789";
+    public static void main(String[] args){
+        sudoku.s00d master;
+        String in;
+        if(args.length>0) in=args[0];
+        else in=def;
+        master = new s00d(in);
+        switch(master.squash()){
+            case -1:
+            System.err.println("no solution");
+            break;
+            //TODO enable dump feature case 2 
+        }
+        master = null;
+    }
+}
+/*
 b8 def[10]="123456789";
 int main(int argc, char **argv){
     s00d *master;
