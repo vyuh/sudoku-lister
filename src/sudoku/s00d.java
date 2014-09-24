@@ -153,7 +153,7 @@ class s00d {
             if(i_v[i].yo(cell.wait)) {
                 if(i_v[i].value()<level) {
                     level=(byte)i_v[i].value();
-                    b=x;
+                    b=i;
                 }
             }
         }
@@ -197,7 +197,7 @@ class s00d {
             }
             i_v[pos].reset(cell.open);
             if (--left == 0) {
-                System.out.println(toString());
+                //System.out.println(toString());
                 return 1;
               //TODO implement counting later  add(cnt,1L); /*cant possibly overflow, should i check?*/
               /*TODO implement dump feature  if(d.buf){
