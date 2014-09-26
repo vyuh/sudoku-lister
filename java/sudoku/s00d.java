@@ -1,4 +1,7 @@
 package sudoku;
+import java.util.Iterator;
+import java.util.Stack;
+import java.util.NoSuchElementException;
 class cell {
     short v;
     final static short wait=0x20;
@@ -17,14 +20,14 @@ class cell {
         if((idea<9)&&(idea>=0)) putIdea(idea);
         else v = 0x7fe7;
     }
-    cell(cell template){
-        v = template.v;
+    cell(cell t){//deep copier
+        v = t.v;
     }
     void putIdea(byte idea){
         v=(short)(idea|open|may_b[idea]);
     }
-    void copyin(cell template){
-        v=template.v;
+    void copyin(cell t){
+        v=t.v;
     }
     String txt() { //for non semantic dump. though portable.
         return ""+v;
@@ -234,6 +237,7 @@ class s00d {
     }
     s00d(String in) {
         byte i;
+        if(in==null) in = "123456789";
         int len = in.length();
         left = 81;
         i_v = new cell[81];
@@ -243,14 +247,14 @@ class s00d {
         for(;i<81;i++) i_v[i] = new cell();
         n=2;
     }
-    s00d(s00d template){
-        left = template.left;
+    s00d(s00d t){//deep copier
+        left = t.left;
         i_v = new cell[81];
-        for(byte i = 0; i<81; i++) i_v[i] = new cell(template.i_v[i]);
+        for(byte i = 0; i<81; i++) i_v[i] = new cell(t.i_v[i]);
     }
-    void copyin(s00d template){
-        left = template.left;
-        for(byte i = 0; i<81; i++) i_v[i].copyin(template.i_v[i]);
+    void copyin(s00d t){
+        left = t.left;
+        for(byte i = 0; i<81; i++) i_v[i].copyin(t.i_v[i]);
     }
     public static void main(String[] args) {
 
@@ -270,34 +274,29 @@ class s00d {
     }
 }
 
-import java.util.Iterator;
-import java.util.Stack;
-import java.util.NoSuchElementException;
 class list extends s00d implements Iterator<String>, Iterable<String> {
     static int d; //sols done in this call
+    byte id; //debug
     class status {
         list s;
         byte p;
         byte v;
+        byte i; //debug
         status(list l, byte pos, byte val){
-            s = l;
+            s = new list(l);
             p = pos;
             v = val;
-        }
-        status(list l){
-            this(l, 10, 10);
         }
     }
     static Stack<status> stata;
     static StringBuilder out;
     static StringBuilder nxt;
-    static boolean readin;
 
     list() {
-        this(def,1);
+        this(null,1);
     }
     list(int npc){
-        this(def,npc);
+        this(null,npc);
     }
     list(String in){
         this(in,1);
@@ -306,12 +305,11 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
     list(String in, int npc){
         super(in);
         int i = 82*npc;
-        readin = false;
         n = npc;
         d = 0; 
+        id = 0; //debug
         out = new StringBuilder(i);
         nxt = new StringBuilder(i);
-        stata = new Stack<status>();
         switch(squash()){
             case -1:
             nxt.delete(0, nxt.length());
@@ -319,6 +317,10 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
             case 2:
             
         }
+    }
+    list(list l){ //deep copier
+        super(l);
+        id = (byte)(l.id+ 1);//debug
     }
     public boolean hasNext() {
         return nxt.length() != 0;
@@ -338,16 +340,11 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
     }
     int hook() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
         byte x, pos, val;
-            System.err.println("hook ");
-
-        if(readin) {
+        if(stata!=null) {
             if(stata.empty()) {
-                readin=false;
+                stata=null;
                 return 1;
-            } else {
-            System.err.println("hook 0 ");
-                return 0;
-     }
+            } else return 0;
         }
         while((pos = idea()) < 81) {
             val = i_v[pos].value();
@@ -357,29 +354,37 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
             i_v[pos].reset(cell.open);
             if (--left == 0) {
                 nxt.append(toString()+"\n");
-                System.out.println(nxt.toString() + sols_done + sols_per_call);
-                sols_done++;
-                if(sols_done==sols_per_call) {
-                    readin =true;
+                d++;
+                if(d==n) {
+                    stata = new Stack<status>();
                     return 2;
                 } else return 1;
             }
         }
-            System.err.println("hook 0");
         return 0;
     }
     int crook(){
         cell mc, cc;
         status copy;
-        if(readin) copy=stata.pop();
-        else {
-            copy = new status(this);
-            if((copy.p=first())>=81) return 1;
+        if(stata!=null) {
+            copy=stata.pop();
+            mc=i_v[copy.p];
+            cc=copy.s.i_v[copy.p];
+            System.err.println("pop " + copy.s.id + " " + copy.p);//debug
+        } else {
+            byte pos;
+            if((pos=first())>=81) {
+                System.err.println("it does reach here!");
+                return 1;
+            } else {
+                copy = new status(this, pos, (byte)0);
+            System.err.println("copy " + copy.s.id + " " + copy.p);//debug
+                mc=i_v[copy.p];
+                cc=copy.s.i_v[copy.p];
+            }
         }
-        mc=i_v[copy.p];
-        cc=copy.s.i_v[copy.p];
-        while(readin||((copy.v=mc.trial(copy.v))<9)){
-            if(!readin){
+        while((stata!=null)||((copy.v=mc.trial(copy.v))<9)){
+            if(stata == null){
                 copy.s.copyin(this);
                 cc.putIdea(copy.v);
             }
@@ -389,18 +394,23 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
                 break;
                 case 2:
                 stata.push(copy);
+            System.err.println("push " + copy.s.id + " " + copy.p);//debug
                 return 2;
                 case -1:
                 mc.rm(copy.v); /* should i check? */
-                if(((copy.p = idea())<81)&&(i_v[copy.p].value()>copy.v)) return 0;
+                byte pos;
+                if(((pos = idea())<81)&&(i_v[pos].value()>copy.v)) {
+            System.err.println("destroy0 " + copy.s.id + " " + copy.p);//debug
+                    return 0;
+                }
             }
         }
+            System.err.println("destroy1 " + copy.s.id + " " + copy.p);//debug
         return 1;
     }
-    public static void main(String[] args) {
-        list yo = new list();
-        if(yo.hasNext()) System.out.print(yo.next());
-        // for(String i:yo) System.out.print(i);
+    public static void main(String[] args){
+        list pk = new list();
+        if(pk.hasNext()) System.out.print(pk.next());
     }
         
 }
