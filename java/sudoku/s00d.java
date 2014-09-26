@@ -357,6 +357,7 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
                 d++;
                 if(d==n) {
                     stata = new Stack<status>();
+                    d=0;
                     return 2;
                 } else return 1;
             }
@@ -370,15 +371,12 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
             copy=stata.pop();
             mc=i_v[copy.p];
             cc=copy.s.i_v[copy.p];
-            System.err.println("pop " + copy.s.id + " " + copy.p);//debug
         } else {
             byte pos;
             if((pos=first())>=81) {
-                System.err.println("it does reach here!");
                 return 1;
             } else {
                 copy = new status(this, pos, (byte)0);
-            System.err.println("copy " + copy.s.id + " " + copy.p);//debug
                 mc=i_v[copy.p];
                 cc=copy.s.i_v[copy.p];
             }
@@ -394,22 +392,19 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
                 break;
                 case 2:
                 stata.push(copy);
-            System.err.println("push " + copy.s.id + " " + copy.p);//debug
                 return 2;
                 case -1:
                 mc.rm(copy.v); /* should i check? */
                 byte pos;
                 if(((pos = idea())<81)&&(i_v[pos].value()>copy.v)) {
-            System.err.println("destroy0 " + copy.s.id + " " + copy.p);//debug
                     return 0;
                 }
             }
         }
-            System.err.println("destroy1 " + copy.s.id + " " + copy.p);//debug
         return 1;
     }
     public static void main(String[] args){
-        list pk = new list();
+        list pk = new list(5);
         if(pk.hasNext()) System.out.print(pk.next());
     }
         
