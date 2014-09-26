@@ -276,11 +276,11 @@ import java.util.NoSuchElementException;
 class list extends s00d implements Iterator<String>, Iterable<String> {
     static int d; //sols done in this call
     class status {
-        s00d s;
+        list s;
         byte p;
         byte v;
         status(list l, byte pos, byte val){
-            s = (s00d) l;
+            s = l;
             p = pos;
             v = val;
         }
@@ -293,17 +293,17 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
     static StringBuilder nxt;
     static boolean readin;
 
-    solutions() {
+    list() {
         this(def,1);
     }
-    solutions(int npc){
+    list(int npc){
         this(def,npc);
     }
-    solutions(String in){
+    list(String in){
         this(in,1);
     }
 
-    solutions(String in, int npc){
+    list(String in, int npc){
         super(in);
         int i = 82*npc;
         readin = false;
@@ -320,10 +320,6 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
             
         }
     }
-
-    solutions(solutions mars){ //  deep copies
-        super(mars);
-    }
     public boolean hasNext() {
         return nxt.length() != 0;
     }
@@ -331,9 +327,7 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
         if(nxt.length() == 0) throw new NoSuchElementException();
         out.delete(0, out.length());
         out.append(nxt);
-        if(!stata.isEmpty()) readin = true;
         squash();
-        
         return out.toString();
     }
     public void remove(){
@@ -349,7 +343,6 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
         if(readin) {
             if(stata.empty()) {
                 readin=false;
-            System.err.println("hook 1 ");
                 return 1;
             } else {
             System.err.println("hook 0 ");
@@ -359,9 +352,7 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
         while((pos = idea()) < 81) {
             val = i_v[pos].value();
             for(x=0; x<20; x++) {       
-                 if(i_v[clr[pos][x]].rm(val)) {
-            System.err.println("hook -1");
- return -1;}
+                 if(i_v[clr[pos][x]].rm(val)) return -1;
             }
             i_v[pos].reset(cell.open);
             if (--left == 0) {
@@ -369,29 +360,21 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
                 System.out.println(nxt.toString() + sols_done + sols_per_call);
                 sols_done++;
                 if(sols_done==sols_per_call) {
-            System.err.println("hook 2");
- return 2;}
-                else {
-            System.err.println("hook 1");
-return 1;}
+                    readin =true;
+                    return 2;
+                } else return 1;
             }
         }
             System.err.println("hook 0");
         return 0;
     }
     int crook(){
-            System.err.println("crook ");
-
         cell mc, cc;
         status copy;
-        if(readin){
- System.err.println("pop"+stata.size());
-            copy=stata.pop();
-        } else {
+        if(readin) copy=stata.pop();
+        else {
             copy = new status(this);
-            if((copy.p=first())>=81) {
-            System.err.println("crook 1");
-return 1;}
+            if((copy.p=first())>=81) return 1;
         }
         mc=i_v[copy.p];
         cc=copy.s.i_v[copy.p];
@@ -405,23 +388,17 @@ return 1;}
                 copy.v++;
                 break;
                 case 2:
- System.err.println("push"+stata.size());
                 stata.push(copy);
-            System.err.println("crook 2");
                 return 2;
                 case -1:
                 mc.rm(copy.v); /* should i check? */
-                if(((copy.p = idea())<81)&&(i_v[copy.p].value()>copy.v)) {
-            System.err.println("crook 0");
-                    return 0;
-                }
+                if(((copy.p = idea())<81)&&(i_v[copy.p].value()>copy.v)) return 0;
             }
         }
-            System.err.println("crook 1");
         return 1;
     }
     public static void main(String[] args) {
-        solutions yo = new solutions();
+        list yo = new list();
         if(yo.hasNext()) System.out.print(yo.next());
         // for(String i:yo) System.out.print(i);
     }
