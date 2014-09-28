@@ -1,20 +1,33 @@
-package sudoku;
+﻿package sudoku;
 import java.util.Iterator;
 import java.util.Stack;
 import java.util.NoSuchElementException;
+var Cell = function () {
+    if (arguments.length) {
+        if(typeof arguments[0] === "object") this.v = arguments[0].v;
+        else {
+            var n = +arguments[0]; 
+    } elseif ( typ === "string") {
+        this.v = parseInt(argument[0]);
+    } else if ( typ === "number" && ) {
+        
+         
+    if(!this.v) this.v = 0x7fe7; //may_be_0..8 wait !open 9_probables_left
+}
+Cell.prototype.putIdea = function() {
+    var idea = arguments[0];
+    this.v = idea|open|may_b[idea]; //check if idea etc are accessible
+}
+Cell.prototype.wait = 0x20;
+Cell.prototype.open = 0x10;
+Cell.prototype.data = 0xf;
+Cell.prototype.may_b = [
+    0x4000, 0x2000, 0x1000,
+    0x0800, 0x0400, 0x0200,
+    0x0100, 0x0080, 0x0040
+];
+
 class cell {
-    short v;
-    final static short wait=0x20;
-    final static short open=0x10;
-    final static short[] may_b={
-        0x4000, 0x2000, 0x1000,
-        0x0800, 0x0400, 0x0200,
-        0x0100, 0x0080, 0x0040
-    };
-    final static short data=0xf;
-    cell() { 
-        v=0x7fe7; //may_be_0..8 wait !open 9_probables_left
-    }
     cell(char i) { // may be only the given value, open, and the value
         byte idea=(byte)((short)i-(short)'1');
         if((idea<9)&&(idea>=0)) putIdea(idea);
@@ -59,6 +72,8 @@ class cell {
         return i;
     }
 }
+
+/*
 class s00d {
     static int n; //number of solutions to print 
     cell[] i_v;
@@ -409,3 +424,4 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
     }
         
 }
+*/
