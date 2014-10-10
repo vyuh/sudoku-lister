@@ -1,4 +1,4 @@
-var pk = {} //to not clutter global namespace. pk picks the rags ;)
+﻿var pk = {} //to not clutter global namespace. pk picks the rags ;)
 pk.cell = function (i) {
 	if (i) {
 		if(typeof i == "object") this.v = i.v
@@ -58,7 +58,7 @@ pk.s00d = function (inp) {
 		if(typeof inp === "object") {
 			left = inp.left
 			this.i_v = []
-			for(var i = 0; i<81; i++) this.i_v[i] = new pk.cell(inp.i_v[i]);
+			for(var i = 0; i<81; i++) this.i_v[i] = new pk.cell(inp.i_v[i])
 			return
 		} else inp = inp.toString()
 	} else inp = '123456789'
@@ -164,23 +164,6 @@ pk.s00d.prototype.first = function() { // first waiting cell or >=81; for ordere
 	for(; i<81; i++) if(this.i_v[i].yo(pk.wait)) break 
 	return i
 }
-pk.s00d.prototype.best = function() {
-	var i=0, level=9, b=81;
-	for(; i<81; i++) {
-		if(this.i_v[i].yo(pk.wait)) {
-			if(this.i_v[i].value()<level) {
-				level=this.i_v[i].value()
-				b=i
-			}
-		}
-	}
-	return b
-	//best waiting cell or >=81; for fast first convergence, no sort
-	//returns the cell with minimum 
-	//number of probables
-	//converges to a solution faster
-	//than selecting the first empty cell
-}
 pk.s00d.prototype.idea = function() { //first open cell or >=81
 	var i = 0
 	for (; i<81; i++) {
@@ -258,140 +241,3 @@ pk.solve = function(constraints) {
 }
 
 pk.solve( )
-/*
-class list extends s00d implements Iterator<String>, Iterable<String> {
-    static int d; //sols done in this call
-    byte id; //debug
-    class status {
-        list s;
-        byte p;
-        byte v;
-        byte i; //debug
-        status(list l, byte pos, byte val){
-            s = new list(l);
-            p = pos;
-            v = val;
-        }
-    }
-    static Stack<status> stata;
-    static StringBuilder out;
-    static StringBuilder nxt;
-
-    list() {
-        this(null,1);
-    }
-    list(int npc){
-        this(null,npc);
-    }
-    list(String in){
-        this(in,1);
-    }
-
-    list(String in, int npc){
-        super(in);
-        int i = 82*npc;
-        n = npc;
-        d = 0; 
-        id = 0; //debug
-        out = new StringBuilder(i);
-        nxt = new StringBuilder(i);
-        switch(squash()){
-            case -1:
-            nxt.delete(0, nxt.length());
-            break;
-            case 2:
-            
-        }
-    }
-    list(list l){ //deep copier
-        super(l);
-        id = (byte)(l.id+ 1);//debug
-    }
-    public boolean hasNext() {
-        return nxt.length() != 0;
-    }
-    public String next(){
-        if(nxt.length() == 0) throw new NoSuchElementException();
-        out.delete(0, out.length());
-        out.append(nxt);
-        squash();
-        return out.toString();
-    }
-    public void remove(){
-        throw new UnsupportedOperationException("Whatta fuck ya doin?\n");
-    }
-    public Iterator<String> iterator(){
-        return this;
-    }
-    int hook() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
-        byte x, pos, val;
-        if(stata!=null) {
-            if(stata.empty()) {
-                stata=null;
-                return 1;
-            } else return 0;
-        }
-        while((pos = idea()) < 81) {
-            val = i_v[pos].value();
-            for(x=0; x<20; x++) {       
-                 if(i_v[clr[pos][x]].rm(val)) return -1;
-            }
-            i_v[pos].reset(cell.open);
-            if (--left == 0) {
-                nxt.append(toString()+"\n");
-                d++;
-                if(d==n) {
-                    stata = new Stack<status>();
-                    d=0;
-                    return 2;
-                } else return 1;
-            }
-        }
-        return 0;
-    }
-    int crook(){
-        cell mc, cc;
-        status copy;
-        if(stata!=null) {
-            copy=stata.pop();
-            mc=i_v[copy.p];
-            cc=copy.s.i_v[copy.p];
-        } else {
-            byte pos;
-            if((pos=first())>=81) {
-                return 1;
-            } else {
-                copy = new status(this, pos, (byte)0);
-                mc=i_v[copy.p];
-                cc=copy.s.i_v[copy.p];
-            }
-        }
-        while((stata!=null)||((copy.v=mc.trial(copy.v))<9)){
-            if(stata == null){
-                copy.s.copyin(this);
-                cc.putIdea(copy.v);
-            }
-            switch(copy.s.squash()){
-                case 1:
-                copy.v++;
-                break;
-                case 2:
-                stata.push(copy);
-                return 2;
-                case -1:
-                mc.rm(copy.v); // should i check? 
-                byte pos;
-                if(((pos = idea())<81)&&(i_v[pos].value()>copy.v)) {
-                    return 0;
-                }
-            }
-        }
-        return 1;
-    }
-    public static void main(String[] args){
-        list pk = new list(5);
-        if(pk.hasNext()) System.out.print(pk.next());
-    }
-        
-}
-*/
