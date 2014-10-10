@@ -1,4 +1,4 @@
-var pk = {} //to not clutter global namespace. pk picks the rags ;)
+﻿var pk = {} //to not clutter global namespace. pk picks the rags ;)
 pk.cell = function (i) {
 	if (i) {
 		if(typeof i == "object") this.v = i.v
@@ -181,9 +181,7 @@ pk.s00d.prototype.hook = function() { // returns { wrong, stale, solved, dumping
 	var x, pos, val
 	while((pos = this.idea()) < 81) {
 		val = this.i_v[pos].value()
-		for(x=0; x<20; x++) {
-			if(this.i_v[pk.clr[pos][x]].rm(val)) return -1
-		} // try removing braces
+		for(x=0; x<20; x++) if(this.i_v[pk.clr[pos][x]].rm(val)) return -1
 		this.i_v[pos].reset(pk.open)
 		if (--this.left == 0) {
 			console.log(this.toString())
@@ -196,10 +194,10 @@ pk.s00d.prototype.hook = function() { // returns { wrong, stale, solved, dumping
 pk.s00d.prototype.crook = function(){
 	var mc, cc, pos, val=0
 	var copy = new pk.s00d(this)
-		if((pos=this.first())<81) {
-			mc=this.i_v[pos]
-			cc=copy.i_v[pos]
-		} else return 1
+	if((pos=this.first())<81) {
+		mc=this.i_v[pos]
+		cc=copy.i_v[pos]
+	} else return 1
 	while((val=mc.trial(val))<9){
 		copy.copyIn(this)
 		cc.putIdea(val)
@@ -226,9 +224,9 @@ pk.s00d.prototype.squash = function(){
 	return ret
 }
     
-pk.solve = function(constraints) {
+pk.solve = function(n, constraints) {
 	var master = new pk.s00d(constraints)
-	pk.n = 500
+	pk.n = n || 2
 	switch(master.squash()) {
 		case -1:
 		console.log("no solution")
@@ -237,4 +235,102 @@ pk.solve = function(constraints) {
 	}
 }
 
-pk.solve( )
+
+pk.list = function (inp, npc) {
+	pk.s00d.call(this, inp)
+	this.status = function(ls, pos, val) {
+		this.l = new pk.list(ls)
+		this.p = pos
+		this.v = val
+	}
+	if(typeof inp == 'object') return
+	pk.n = npc || 1
+	pk.d = 0 //sols done in this call
+	pk.nxt = ''
+	switch(this.squash()) {
+		case -1:
+		break
+		case 2:
+	}
+}
+
+// subclass extends superclass
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
+pk.list.prototype = Object.create(pk.s00d.prototype)
+pk.list.prototype.constructor = pk.list
+
+pk.list.prototype.hasNext = function() {
+        return pk.nxt.length != 0;
+}
+pk.list.prototype.next = function(){
+	if(pk.nxt.length == 0) return undefined
+	pk.out = ''
+	pk.out += pk.nxt
+	this.squash()
+	return pk.out
+}
+pk.list.prototype.hook = function() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
+	var x, pos, val
+	if(pk.stata) {
+		if(pk.stata.length == 0) {
+			delete pk.stata
+			return 1
+		} else return 0
+	}
+	while((pos = this.idea()) < 81) {
+		val = this.i_v[pos].value()
+		for(x=0; x<20; x++) {
+			if(this.i_v[pk.clr[pos][x]].rm(val)) return -1
+		} // try removing braces
+		this.i_v[pos].reset(pk.open)
+		if (--this.left == 0) {
+			pk.nxt += (this.toString() + "\n") //check \n in js
+			pk.d++
+			if(pk.d == pk.n) {
+				pk.stata = [] // i hope empty array is true in js
+				pk.d = 0
+				return 2
+			} else return 1
+		}
+	}
+	return 0
+}
+pk.list.prototype.crook = function(){
+	var mc, cc, pos, val=0, copy
+	if(pk.stata) {
+		copy = pk.stata.pop();
+		mc = this.i_v[copy.p];
+		cc=copy.l.i_v[copy.p];
+	} else {
+		if((pos=this.first())>=81) return 1
+		else {
+			copy = new this.status(this, pos, 0)
+			mc=this.i_v[copy.p]
+			cc=copy.l.i_v[copy.p]
+		}
+	}
+	while(pk.stata||((copy.v=mc.trial(copy.v))<9)){
+		if(!pk.stata){
+			copy.l.copyIn(this);
+			cc.putIdea(copy.v);
+		}
+		switch(copy.l.squash()){
+			case 1:
+			copy.v++
+			break
+			case 2:
+			pk.stata.push(copy);
+			return 2;
+			case -1:
+			mc.rm(copy.v); /* should i check? */
+			if(((pos = this.idea())<81)&&(this.i_v[pos].value()>copy.v)) return 0
+		}
+	}
+	return 1
+}
+pk.iter = function(n, constraints){
+	p = new pk.list(constraints, n||2)
+	if(p.hasNext()) console.log(p.next());
+} 
+pk.solve()
+pk.iter()
