@@ -11,6 +11,38 @@ var Cell = function (i) {
 Cell.prototype.putIdea = function(idea) {
     this.v = idea|this.open|this.may_b[idea]; //check if idea etc are accessible
 }
+Cell.prototype.copyIn = function(i){
+	this.v = i.v
+}
+Cell.prototype.txt = function() {
+	return ''+this.v
+}
+Cell.prototype.yo = function(mask) {
+	return ((this.v&mask)!=0)
+}
+Cell.prototype.reset = function(mask) { //reset the mask
+	this.v&=~mask;
+}
+Cell.prototype.value = function(){ //value of an open or filled cell
+	return (this.v&this.data);
+}
+Cell.prototype.rm = function(i) { // returns success or failure (false or true respectively)
+	if (this.yo(this.may_b[i])) { //has it in probable
+		if (!this.yo(this.wait)) return true; // it is the only probable!!
+		this.reset(may_b[i]);
+		this.v--;
+		if(this.yo(this.open)) {// only one probable left now
+			for(i=0; i<9; i++) if(this.yo(this.may_b[i])) break;
+			this.putIdea(i)
+		}
+	}
+	return false; //removed ok
+}
+Cell.prototype.trial = function(i) { // returns trial value or >=9 if no trial available
+	for(; i<9; i++) if(this.yo(this.may_b[i])) break;
+	return i;
+}
+
 Cell.prototype.wait = 0x20;
 Cell.prototype.open = 0x10;
 Cell.prototype.data = 0xf;
@@ -19,7 +51,7 @@ Cell.prototype.may_b = [
     0x0800, 0x0400, 0x0200,
     0x0100, 0x0080, 0x0040
 ];
-var pk = new Cell(1)
+var pk = new Cell('1')
 console.log(JSON.stringify(pk));
 
 /*
