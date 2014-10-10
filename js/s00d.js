@@ -1,22 +1,15 @@
-﻿package sudoku;
-import java.util.Iterator;
-import java.util.Stack;
-import java.util.NoSuchElementException;
-var Cell = function () {
-    if (arguments.length) {
-        if(typeof arguments[0] === "object") this.v = arguments[0].v;
-        else {
-            var n = +arguments[0]; 
-    } elseif ( typ === "string") {
-        this.v = parseInt(argument[0]);
-    } else if ( typ === "number" && ) {
-        
-         
-    if(!this.v) this.v = 0x7fe7; //may_be_0..8 wait !open 9_probables_left
+var Cell = function (i) {
+	if (i) {
+		if(typeof i === "object") this.v = i.v
+		else {
+			var idea = i - 1
+			if((idea<9)&&(idea>=0)) this.putIdea(idea)
+			else this.v = 0x7fe7;
+		}
+	} else this.v = 0x7fe7;
 }
-Cell.prototype.putIdea = function() {
-    var idea = arguments[0];
-    this.v = idea|open|may_b[idea]; //check if idea etc are accessible
+Cell.prototype.putIdea = function(idea) {
+    this.v = idea|this.open|this.may_b[idea]; //check if idea etc are accessible
 }
 Cell.prototype.wait = 0x20;
 Cell.prototype.open = 0x10;
@@ -26,7 +19,10 @@ Cell.prototype.may_b = [
     0x0800, 0x0400, 0x0200,
     0x0100, 0x0080, 0x0040
 ];
+var pk = new Cell(1)
+console.log(JSON.stringify(pk));
 
+/*
 class cell {
     cell(char i) { // may be only the given value, open, and the value
         byte idea=(byte)((short)i-(short)'1');
@@ -73,7 +69,6 @@ class cell {
     }
 }
 
-/*
 class s00d {
     static int n; //number of solutions to print 
     cell[] i_v;
@@ -178,11 +173,11 @@ class s00d {
         }
         return b;
     }
-    /*  returns the cell with minimum 
-        number of probables
-        converges to a solution faster
-        than selecting the first empty cell
-    */
+    //  returns the cell with minimum 
+    //    number of probables
+    //    converges to a solution faster
+    //    than selecting the first empty cell
+    
     
     byte idea() { //first open cell or >=81
         byte i = 0;
@@ -235,7 +230,7 @@ class s00d {
                     case 2:
                     return 2;
                     case -1:
-                    mc.rm(val); /* should i check? */
+                    mc.rm(val); // should i check? 
                     if(((pos = idea())<81)&&(i_v[pos].value()>val)) {
                         copy = null;
                         return 0;
@@ -409,7 +404,7 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
                 stata.push(copy);
                 return 2;
                 case -1:
-                mc.rm(copy.v); /* should i check? */
+                mc.rm(copy.v); // should i check? 
                 byte pos;
                 if(((pos = idea())<81)&&(i_v[pos].value()>copy.v)) {
                     return 0;

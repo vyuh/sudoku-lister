@@ -1,0 +1,26 @@
+{
+  "name": "s00d",
+  "version": "1.0.0",
+  "description": "sudoku lister",
+  "main": "sud.js",
+  "scripts": {
+    "test": "test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/vyuh/sudoku-lister.git"
+  },
+  "keywords": [
+    "sudoku",
+    "solve",
+    "generate",
+    "list"
+  ],
+  "author": "Prashant Karmakar",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vyuh/sudoku-lister/issues"
+  },
+  "homepage": "https://github.com/vyuh/sudoku-lister",
+  "dependencies": {}
+}
