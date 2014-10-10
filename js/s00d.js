@@ -1,4 +1,4 @@
-﻿var pk = {} //to not clutter global namespace. pk picks the rags ;)
+var pk = {} //to not clutter global namespace. pk picks the rags ;)
 pk.cell = function (i) {
 	if (i) {
 		if(typeof i == "object") this.v = i.v
@@ -52,11 +52,10 @@ pk.may_b = [
     0x0800, 0x0400, 0x0200,
     0x0100, 0x0080, 0x0040
 ];
-
 pk.s00d = function (inp) {
 	if(inp) {
 		if(typeof inp === "object") {
-			left = inp.left
+			this.left = inp.left
 			this.i_v = []
 			for(var i = 0; i<81; i++) this.i_v[i] = new pk.cell(inp.i_v[i])
 			return
@@ -70,7 +69,6 @@ pk.s00d = function (inp) {
 		this.i_v[i] = new pk.cell(inp.charAt(i))
 	}
 	for(;i<81;i++) this.i_v[i] = new pk.cell()
-	this.n = 2 //max no. of solutions to generate per call
 }
 pk.s00d.prototype.copyIn = function(t) {
 	this.left = t.left;
@@ -167,7 +165,7 @@ pk.s00d.prototype.first = function() { // first waiting cell or >=81; for ordere
 pk.s00d.prototype.idea = function() { //first open cell or >=81
 	var i = 0
 	for (; i<81; i++) {
-		if (this.i_v[i].yo(pk.cell.open)) break
+		if (this.i_v[i].yo(pk.open)) break
 	}
 	return i
 }
@@ -183,14 +181,14 @@ pk.s00d.prototype.hook = function() { // returns { wrong, stale, solved, dumping
 	var x, pos, val
 	while((pos = this.idea()) < 81) {
 		val = this.i_v[pos].value()
-		for(x=0; x<20; x++) {       
+		for(x=0; x<20; x++) {
 			if(this.i_v[pk.clr[pos][x]].rm(val)) return -1
 		} // try removing braces
-		this.i_v[pos].reset(pk.cell.open)
-		if (--left == 0) {
+		this.i_v[pos].reset(pk.open)
+		if (--this.left == 0) {
 			console.log(this.toString())
-			this.n--; if(n==0) return 2
-			return 1
+			pk.n = pk.n || 2
+			return --pk.n ? 1 : 2
 		}
 	}
 	return 0
@@ -229,13 +227,12 @@ pk.s00d.prototype.squash = function(){
 }
     
 pk.solve = function(constraints) {
-	var master = new pk.s00d(constraints);
-        console.log(master.toString())
-	master.n = 500;
+	var master = new pk.s00d(constraints)
+	pk.n = 500
 	switch(master.squash()) {
 		case -1:
-		console.log("no solution");
-		break;
+		console.log("no solution")
+		break
 		case 2:
 	}
 }
