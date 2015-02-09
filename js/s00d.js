@@ -224,7 +224,7 @@ pk.s00d.prototype.squash = function(){
 	return ret
 }
     
-pk.solve = function(n, constraints) {
+module.exports.solve = function(n, constraints) {
 	var master = new pk.s00d(constraints)
 	pk.n = n || 2
 	switch(master.squash()) {
@@ -328,9 +328,7 @@ pk.list.prototype.crook = function(){
 	}
 	return 1
 }
-pk.iter = function(n, constraints){
+module.exports.iter = function(n, constraints){
 	p = new pk.list(constraints, n||2)
 	if(p.hasNext()) console.log(p.next());
-} 
-pk.solve()
-pk.iter()
+}
