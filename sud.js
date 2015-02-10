@@ -69,6 +69,8 @@ pk.sud = function (inp) {
 		this.i_v[i] = new pk.cell(inp.charAt(i))
 	}
 	for(;i<81;i++) this.i_v[i] = new pk.cell()
+	pk.d = 0 //sols done in this call
+	pk.out = []
 }
 pk.sud.prototype.copyIn = function(t) {
 	this.left = t.left;
@@ -184,9 +186,9 @@ pk.sud.prototype.hook = function() { // returns { wrong, stale, solved, dumping 
 		for(x=0; x<20; x++) if(this.i_v[pk.clr[pos][x]].rm(val)) return -1
 		this.i_v[pos].reset(pk.open)
 		if (--this.left == 0) {
-			console.log(this.toString())
-			pk.n = pk.n || 2
-			return --pk.n ? 1 : 2
+			pk.out.push(this.toString())
+			pk.d++
+			return pk.d == pk.n ? 2 : 1
 		}
 	}
 	return 0
@@ -223,52 +225,30 @@ pk.sud.prototype.squash = function(){
 	do if((ret=this.hook())!=0) return ret; while (0==(ret=this.crook()))
 	return ret
 }
-    
-module.exports.solve = function(n, constraints) {
-	var master = new pk.sud(constraints)
-	pk.n = n || 2
-	switch(master.squash()) {
-		case -1:
-		console.log("no solution")
-		break
-		case 2:
-	}
-}
 
-
-pk.list = function (inp, npc) {
-	pk.sud.call(this, inp)
+pk.list = function (inp) {
+	pk.sud.call(this, inp) // calling superclass constructor
 	this.status = function(ls, pos, val) {
 		this.l = new pk.list(ls)
 		this.p = pos
 		this.v = val
 	}
 	if(typeof inp == 'object') return
-	pk.n = npc || 1
-	pk.d = 0 //sols done in this call
-	pk.nxt = ''
+        pk.nxt = []
 	switch(this.squash()) {
 		case -1:
+                this = undefined
 		break
 		case 2:
 	}
 }
 
+    
 // subclass extends superclass
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
 pk.list.prototype = Object.create(pk.sud.prototype)
 pk.list.prototype.constructor = pk.list
 
-pk.list.prototype.hasNext = function() {
-        return pk.nxt.length != 0;
-}
-pk.list.prototype.next = function(){
-	if(pk.nxt.length == 0) return undefined
-	pk.out = ''
-	pk.out += pk.nxt
-	this.squash()
-	return pk.out
-}
 pk.list.prototype.hook = function() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
 	var x, pos, val
 	if(pk.stata) {
@@ -284,11 +264,10 @@ pk.list.prototype.hook = function() { // returns { wrong, stale, solved, dumping
 		} // try removing braces
 		this.i_v[pos].reset(pk.open)
 		if (--this.left == 0) {
-			pk.nxt += (this.toString() + "\n") //check \n in js
+			pk.nxt.push(this.toString())
 			pk.d++
 			if(pk.d == pk.n) {
 				pk.stata = [] // i hope empty array is true in js
-				pk.d = 0
 				return 2
 			} else return 1
 		}
@@ -328,7 +307,30 @@ pk.list.prototype.crook = function(){
 	}
 	return 1
 }
-module.exports.iter = function(n, constraints){
-	p = new pk.list(constraints, n||2)
-	if(p.hasNext()) console.log(p.next());
+pk.list.prototype.next = function(){
+	if(pk.nxt.length == 0) return undefined
+	pk.out = pk.nxt
+        pk.nxt = []
+        pk.d = 0
+	this.squash()
+	return pk.out
+}
+pk.list.prototype.hasNext = function() {
+        return pk.nxt.length != 0;
+}
+module.exports.iter = function(constraints, n){
+	pk.n = n || 2
+	return new pk.list(constraints)
+}
+
+module.exports.list = function(constraints, n) {
+	var master = new pk.sud(constraints)
+	pk.n = n || 2
+	switch(master.squash()) {
+		case -1:
+		console.log("no solution")
+		break
+		case 2:
+	}
+        return pk.out
 }
