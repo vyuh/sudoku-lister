@@ -334,20 +334,3 @@ module.exports.list = function(constraints, n) {
 	}
         return pk.out
 }
-module.exports.form = function (a) {
-  var b= typeof a == "string"? a.split(''):[]
-  var out = [ '<form action="/">',
-          '<div class="sud">']
-  for (var i=0, j=0; j<9; j++) {
-    out.push( '<div class="grid' , j%3 ? '">' : ' start">')
-    for (var k=0; k<9; k++, i++) {
-      out.push( '<input type="text" maxlength="1" name="c', i, '" value="', b[i], '" class="cell' , k%3?'"':' start"', '/>')
-    }
-    out.push('</div>')
-  }
-  out.push('</div>',
-'<input type="reset"/>',
-'<input type="submit" value="Solve"/>',
-'</form>')
-  return out.join("")
-}
