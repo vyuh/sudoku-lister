@@ -237,7 +237,6 @@ pk.list = function (inp) {
         pk.nxt = []
 	switch(this.squash()) {
 		case -1:
-                this = undefined
 		break
 		case 2:
 	}
