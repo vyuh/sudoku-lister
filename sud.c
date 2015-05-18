@@ -57,7 +57,7 @@ int scope_gen(b8 clr[81*20]){
       r=i/(9);
       c=i%(9);
       gr=(r/3)*3;
-      gc=(c/3)*3;   
+      gc=(c/3)*3;
       for (j=0; j<9; j++) {
          scope[r*9+j]++;
          scope[j*9+c]++;
@@ -80,6 +80,10 @@ struct {
     int top;
     int pos;
 } d;
+#include <unistd.h>
+char *bound;
+b8 bounded;
+
 #include <signal.h>
 void rq(int sig){
     fputs("\ndump requested\n", stderr);
@@ -271,7 +275,15 @@ int hook(s00d *puzl) {
         if (!(--(puzl->left))) {
             STR(out,puzl);
             fputs(out ,stdout);
-            add(cnt,1L); //cant possibly overflow, should i check?
+            add(cnt,1L); /*cant possibly overflow, should i check?*/
+            if(bounded) {
+                vyu(out, cnt); /* haha! passing a global :D*/
+                if(strstr(out,bound)
+                    &&
+                   strcmp(strstr(out,bound),bound)>=0
+                ) raise(SIGINT);
+            }
+            vyu(out, cnt);
             if(d.buf){
                 d.pos=0;
                 return 2;
@@ -328,13 +340,12 @@ int squash(s00d *puzl){
     return ret;
 }
 
-
-
-
+#include <ctype.h>
 int main(int argc, char **argv){
     s00d *master;
     char *in;
     FILE *dump;
+    int opt;
 
     d.buf=0;
     d.stack=0;
@@ -342,8 +353,34 @@ int main(int argc, char **argv){
 
     scope_gen(clr);
 
-    if(argc>1) {
-        in=argv[1];
+    while ((opt = getopt(argc, argv, "n:")) != -1) {
+        switch (opt) {
+        case 'n':
+            if((strlen(optarg)-strspn(optarg, "0"))>33) {
+              fprintf(stderr,
+                "bound exceeds size of solution set. hence ignored.\n"
+              );
+              break;
+            }
+            if(strlen(optarg)!=strspn(optarg, "0123456789abcdefABCDEF")){
+              fprintf(stderr,
+                "bound must be a hexadecimal number\n"
+              );
+              exit(EXIT_FAILURE);
+            }
+            bound = optarg;
+            bounded = 1;
+            break;
+        default: /* '?' */
+            fprintf(stderr, "Usage: %s [-n bound] [sudoku]\n",
+                    argv[0]);
+            exit(EXIT_FAILURE);
+        }
+    }
+
+
+    if(optind < argc) {
+        in=argv[optind];
     } else {
         if(rd()) in=def; else {
             d.top--;
