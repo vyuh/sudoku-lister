@@ -101,14 +101,12 @@ int dmp(s00d *s, int p, int v){
     l+=sprintf(eye, "%02x ", p); eye+=3;
     l+=sprintf(eye, "%02x\n", v);
 
-    return l;//the characters written d.pos to be incremented outside
+    return l;/*the characters written d.pos to be incremented outside*/
 }
 int burn(state *n){
     for(;n>=d.stack;n--) free(n->s);
-    free(d.stack);
-    d.stack=0;
-    free(d.buf);
-    d.buf=0;
+    free(d.stack); d.stack=0;
+    free(d.buf); d.buf=0;
     return 1;
 }
 int rd(){
@@ -121,15 +119,14 @@ int rd(){
     if(!(dump=fopen("dump", "rb"))) return 2;
     if(!(d.buf=(char *)malloc(81*414))) die("RAM denied\n");
     memset(d.buf, 0, 81*414);
-    depth=fread(d.buf, 414, 81, dump); //if CRLF & fread doesnt copy the last incomplete line
+    depth=fread(d.buf, 414, 81, dump); /*if CRLF & fread doesnt copy the last incomplete line */
     fclose(dump);
     if(!depth) return 1;
 
     if(!(d.stack=(state *)malloc(sizeof(state)*depth))) die("RAM denied\n");
     memset(d.stack, 0, sizeof(state)*depth);
 
-    line=strtok(d.buf,"\r\n");
-    d.top=0;
+    line=strtok(d.buf,"\r\n"); d.top=0;
     while(line&&depth){
         now=d.stack+d.top;
         if(!(now->s=(s00d *)malloc(sizeof(s00d)))) die("RAM denied\n");
@@ -138,20 +135,12 @@ int rd(){
             if((this+5!=nxt)&&(i!=0||(this+4!=nxt))) return burn(now);
             this=nxt; 
         }
-        now->s->left=(b8)strtoul(this,&nxt,16);
-        if(this+3!=nxt) return burn(now);
-        this=nxt;
-        now->p=(b8)strtoul(this,&nxt,16);
-        if(this+3!=nxt) return burn(now);
-        this=nxt;
-        now->v=(b8)strtoul(this,&nxt,16);
-        if(this+3!=nxt) return burn(now);
-        line=strtok(0,"\r\n");
-        d.top++;
-        depth--;
+        now->s->left=(b8)strtoul(this,&nxt,16); if(this+3!=nxt) return burn(now); this=nxt;
+        now->p=(b8)strtoul(this,&nxt,16); if(this+3!=nxt) return burn(now); this=nxt;
+        now->v=(b8)strtoul(this,&nxt,16); if(this+3!=nxt) return burn(now);
+        line=strtok(0,"\r\n"); d.top++; depth--;
     }
-    free(d.buf);
-    d.buf=0;
+    free(d.buf); d.buf=0;
     return 0;
 }
 
@@ -262,9 +251,7 @@ int hook(s00d *puzl) {
     b8 pos, val;
     if(d.stack) {
         if(d.top) return 0;
-        free(d.stack);
-        d.stack=0;
-        d.top=-1;
+        free(d.stack); d.stack=0; d.top=-1;
         return 1;
     }
     while(idea(puzl, &pos, &val)) {
