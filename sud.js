@@ -1,5 +1,8 @@
 var pk = {} //to not clutter global namespace. pk picks the rags ;)
+
+//the cell class
 pk.cell = function(i) {
+    //cell object constructor
     if (i) {
         if (typeof i == "object") this.v = i.v
         else {
@@ -46,6 +49,7 @@ pk.cell.prototype.trial = function(i) { // returns trial value or >=9 if no tria
     return i;
 }
 
+//the package globals
 pk.wait = 0x20;
 pk.open = 0x10;
 pk.data = 0xf;
@@ -54,30 +58,6 @@ pk.may_b = [
     0x0800, 0x0400, 0x0200,
     0x0100, 0x0080, 0x0040
 ];
-pk.sud = function(inp) {
-    if (inp) {
-        if (typeof inp === "object") {
-            this.left = inp.left
-            this.i_v = []
-            for (var i = 0; i < 81; i++) this.i_v[i] = new pk.cell(inp.i_v[i])
-            return
-        } else inp = inp.toString()
-    } else inp = '123456789'
-    var len = inp.length
-    this.left = 81
-    this.i_v = []
-    var i = 0
-    for (; i < len && i < 81; i++) {
-        this.i_v[i] = new pk.cell(inp.charAt(i))
-    }
-    for (; i < 81; i++) this.i_v[i] = new pk.cell()
-    pk.d = 0 //sols done in this call
-    pk.out = []
-}
-pk.sud.prototype.copyIn = function(t) {
-    this.left = t.left;
-    for (var i = 0; i < 81; i++) this.i_v[i].copyIn(t.i_v[i]);
-}
 pk.clr = [
     [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 63, 27, 54, 45, 18, 19, 72, 20, 36],
     [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 46, 37, 28, 18, 19, 20, 55, 73, 0, 64],
@@ -161,13 +141,41 @@ pk.clr = [
     [60, 61, 62, 34, 70, 72, 74, 76, 78, 80, 43, 25, 71, 69, 52, 7, 75, 77, 73, 16],
     [60, 8, 62, 17, 35, 70, 72, 74, 76, 78, 44, 53, 69, 71, 73, 75, 77, 79, 61, 26]
 ]
-pk.sud.prototype.first = function() { // first waiting cell or >=81; for ordered listing of solutions
+
+//the sud class. models a sudoku
+pk.sud = function(inp) {
+    if (inp) {
+        if (typeof inp === "object") {
+            this.left = inp.left
+            this.i_v = []
+            for (var i = 0; i < 81; i++) this.i_v[i] = new pk.cell(inp.i_v[i])
+            return
+        } else inp = inp.toString()
+    } else inp = '123456789'
+    var len = inp.length
+    this.left = 81
+    this.i_v = []
+    var i = 0
+    for (; i < len && i < 81; i++) {
+        this.i_v[i] = new pk.cell(inp.charAt(i))
+    }
+    for (; i < 81; i++) this.i_v[i] = new pk.cell()
+    pk.d = 0 //sols done in this call
+    pk.out = []
+}
+pk.sud.prototype.copyIn = function(t) {
+    this.left = t.left;
+    for (var i = 0; i < 81; i++) this.i_v[i].copyIn(t.i_v[i]);
+}
+pk.sud.prototype.first = function() {
+    // first waiting cell or >=81; for ordered listing of solutions
     var i = 0
     for (; i < 81; i++)
         if (this.i_v[i].yo(pk.wait)) break
     return i
 }
-pk.sud.prototype.idea = function() { //first open cell or >=81
+pk.sud.prototype.idea = function() {
+    //first open cell or >=81
     var i = 0
     for (; i < 81; i++) {
         if (this.i_v[i].yo(pk.open)) break
@@ -182,7 +190,8 @@ pk.sud.prototype.toString = function() {
     }
     return buf;
 }
-pk.sud.prototype.hook = function() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
+pk.sud.prototype.hook = function() {
+    // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
     var x, pos, val
     while ((pos = this.idea()) < 81) {
         val = this.i_v[pos].value()
@@ -232,8 +241,12 @@ pk.sud.prototype.squash = function() {
         return ret
 }
 
+//the list class. subclass of sud.
+//solution lister engine
+//an iterator
 pk.list = function(inp) {
-    pk.sud.call(this, inp) // calling superclass constructor
+    // calling superclass constructor
+    pk.sud.call(this, inp)
     this.status = function(ls, pos, val) {
         this.l = new pk.list(ls)
         this.p = pos
@@ -254,7 +267,8 @@ pk.list = function(inp) {
 pk.list.prototype = Object.create(pk.sud.prototype)
 pk.list.prototype.constructor = pk.list
 
-pk.list.prototype.hook = function() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
+pk.list.prototype.hook = function() {
+    // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
     var x, pos, val
     if (pk.stata) {
         if (pk.stata.length == 0) {
@@ -300,15 +314,14 @@ pk.list.prototype.crook = function() {
             cc.putIdea(copy.v);
         }
         switch (copy.l.squash()) {
-            case 1:
-                copy.v++
-                break
-            case 2:
-                pk.stata.push(copy);
-                return 2;
-            case -1:
-                mc.rm(copy.v); /* should i check? */
-                if (((pos = this.idea()) < 81) && (this.i_v[pos].value() > copy.v)) return 0
+            case 1: copy.v++; break;
+            case 2: pk.stata.push(copy); return 2;
+            case -1: mc.rm(copy.v); /* should i check? */
+                if (
+                    ((pos = this.idea()) < 81)
+                    &&
+                    (this.i_v[pos].value() > copy.v)
+                ) return 0
         }
     }
     return 1
@@ -324,6 +337,8 @@ pk.list.prototype.next = function() {
 pk.list.prototype.hasNext = function() {
     return pk.nxt.length != 0;
 }
+
+//exports
 module.exports.iter = function(constraints, n) {
     pk.n = n || 2
     return new pk.list(constraints)
