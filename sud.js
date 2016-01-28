@@ -1,4 +1,4 @@
-'use strict';
+//'use strict';
 var pk = {}; //to not clutter global namespace. pk picks the rags ;)
 
 //the cell class
@@ -177,7 +177,7 @@ pk.sud = function (inp) {
         this.i_v[i] = new pk.cell(inp.charAt(i))
     }
     for (; i < 81; i += 1) this.i_v[i] = new pk.cell()
-    pk.out = []
+    arguments.callee.__out__ = []
 }
 pk.sud.prototype.copyIn = function (t) {
     this.left = t.left;
@@ -226,8 +226,8 @@ pk.sud.prototype.hook = function () {
         }
         this.i_v[pos].reset(pk.open)
         if ((this.left -= 1) === 0) {
-            pk.out.push(this.toString())
-            return pk.out.length === pk.n ? 2 : 1
+            this.constructor.__out__.push(this.toString())
+            return this.constructor.__out__.length === pk.n ? 2 : 1
         }
     }
     return 0
@@ -377,5 +377,5 @@ module.exports.list = function (constraints, n) {
             break
         case 2:
     }
-    return pk.out
+    return master.constructor.__out__
 }
