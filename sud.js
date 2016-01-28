@@ -161,10 +161,12 @@ pk.clr = [
 pk.sud = function (inp) {
     if (inp) {
         if (typeof inp === "object") {
-            this.left = inp.left
-            this.i_v = []
-            for (var i = 0; i < 81; i += 1) this.i_v[i] = new pk.cell(inp.i_v[i])
-            return
+            this.left = inp.left;
+            this.i_v = [];
+            for (var i = 0; i < 81; i += 1) {
+                this.i_v[i] = new pk.cell(inp.i_v[i]);
+            }
+            return;
         } else inp = inp.toString()
     } else inp = '123456789'
     var len = inp.length
