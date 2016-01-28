@@ -177,7 +177,6 @@ pk.sud = function (inp) {
         this.i_v[i] = new pk.cell(inp.charAt(i))
     }
     for (; i < 81; i += 1) this.i_v[i] = new pk.cell()
-    pk.d = 0 //sols done in this call
     pk.out = []
 }
 pk.sud.prototype.copyIn = function (t) {
@@ -228,8 +227,7 @@ pk.sud.prototype.hook = function () {
         this.i_v[pos].reset(pk.open)
         if ((this.left -= 1) === 0) {
             pk.out.push(this.toString())
-            pk.d += 1
-            return pk.d === pk.n ? 2 : 1
+            return pk.out.length === pk.n ? 2 : 1
         }
     }
     return 0
@@ -312,8 +310,7 @@ pk.list.prototype.hook = function () {
         this.i_v[pos].reset(pk.open)
         if ((this.left -= 1) === 0) {
             pk.nxt.push(this.toString())
-            pk.d += 1
-            if (pk.d === pk.n) {
+            if (pk.nxt.length === pk.n) {
                 pk.stata = [] // i hope empty array is true in js
                 return 2
             } else return 1
@@ -358,7 +355,6 @@ pk.list.prototype.next = function () {
     if (pk.nxt.length === 0) return undefined
     pk.out = pk.nxt
     pk.nxt = []
-    pk.d = 0
     this.squash()
     return pk.out
 }
