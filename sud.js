@@ -227,7 +227,7 @@ pk.sud.prototype.hook = function () {
         this.i_v[pos].reset(pk.open)
         if ((this.left -= 1) === 0) {
             this.constructor.__out__.push(this.toString())
-            return this.constructor.__out__.length === pk.n ? 2 : 1
+            return this.constructor.__out__.length === this.constructor.__n__ ? 2 : 1;
         }
     }
     return 0
@@ -370,7 +370,7 @@ module.exports.iter = function (constraints, n) {
 
 module.exports.list = function (constraints, n) {
     var master = new pk.sud(constraints)
-    pk.n = n || 2
+    master.constructor.__n__ = n || 2;
     switch (master.squash()) {
         case -1:
             console.log("no solution")
