@@ -1,7 +1,7 @@
 //'use strict';
 (function () {
     var pk = {};
-    //to not clutter global namespace. pk picks the rags ;)
+
     function scope_gen(n) {
         // for normal sudoku latin square, n is 3
         // a latin square has n^4 cells
@@ -61,20 +61,26 @@
     pk.cell.prototype.yo = function (mask) {
         return ((this.v & mask) !== 0);
     };
-    pk.cell.prototype.reset = function (mask) { //reset the mask
+    pk.cell.prototype.reset = function (mask) {
+        //reset the mask
         this.v &= ~mask;
     };
-    pk.cell.prototype.value = function () { //value of an open or filled cell
+    pk.cell.prototype.value = function () {
+        //value of an open or filled cell
         return (this.v & pk.data);
     };
-    pk.cell.prototype.rm = function (i) { // returns success or failure (false or true respectively)
-        if (this.yo(pk.may_b[i])) { //has it in probable
+    pk.cell.prototype.rm = function (i) {
+        // returns success or failure (false or true respectively)
+        if (this.yo(pk.may_b[i])) {
+            //has it in probable
             if (!this.yo(pk.wait)) {
-                return true; // it is the only probable!!
+                return true;
+                // it is the only probable!!
             }
             this.reset(pk.may_b[i]);
             this.v -= 1;
-            if (this.yo(pk.open)) { // only one probable left now
+            if (this.yo(pk.open)) {
+                // only one probable left now
                 for (i = 0; i < 9; i += 1) {
                     if (this.yo(pk.may_b[i])) {
                         break;
@@ -83,9 +89,11 @@
                 this.putIdea(i);
             }
         }
-        return false; //removed ok
+        return false;
+        //removed ok
     };
-    pk.cell.prototype.trial = function (i) { // returns trial value or >=9 if no trial available
+    pk.cell.prototype.trial = function (i) {
+        // returns trial value or >=9 if no trial available
         for (; i < 9; i += 1) {
             if (this.yo(pk.may_b[i])) {
                 break;
@@ -198,8 +206,11 @@
                 return 2
             case -1:
                 mc.rm(val) // should i check? 
-                if (((pos = this.idea()) < 81) && (this.i_v[pos].value() >
-                    val)) {
+                if (
+                        ((pos = this.idea()) < 81)
+                        &&
+                        (this.i_v[pos].value() > val)
+                ) {
                     copy = null
                     return 0
                 }
@@ -255,7 +266,8 @@
             if ((this.left -= 1) === 0) {
                 pk.nxt.push(this.toString())
                 if (pk.nxt.length === pk.n) {
-                    pk.stata = [] // i hope empty array is true in js
+                    pk.stata = []
+                    // i hope empty array is true in js
                     return 2
                 } else return 1
             }
