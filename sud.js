@@ -1,5 +1,20 @@
 //'use strict';
-(function () {
+
+//WOAH https://gist.github.com/ryanflorence/1198466
+(function (name, definition){
+  if (typeof define === 'function'){ // AMD
+    define(definition);
+  } else if (typeof module !== 'undefined' && module.exports) { // Node.js
+    module.exports = definition();
+  } else { // Browser
+    var theModule = definition(), global = this, old = global[name];
+    theModule.noConflict = function () {
+      global[name] = old;
+      return theModule;
+    };
+    global[name] = theModule;
+  }
+})('sud', function () {
     var pk = {};
 
     function scope_gen(n) {
@@ -321,11 +336,13 @@
         return pk.nxt.length !== 0;
     }
     //exports
-    module.exports.iter = function (constraints, n) {
+
+    var o = {};
+    o.iter = function (constraints, n) {
         pk.n = n || 2
         return new pk.list(constraints)
     }
-    module.exports.list = function (constraints, n) {
+    o.list = function (constraints, n) {
         var master = new pk.sud(constraints)
         master.constructor.__n__ = n || 2;
         switch (master.squash()) {
@@ -336,7 +353,8 @@
         }
         return master.constructor.__out__
     }
-})();
+    return o;
+});
 /*
 TODO:
 change pk.nxt pk.out pk.n pk.stata. /pk\.[^.]* /
