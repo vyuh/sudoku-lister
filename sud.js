@@ -1,4 +1,6 @@
 //'use strict';
+
+(function (){
 var pk = {};
 //to not clutter global namespace. pk picks the rags ;)
 
@@ -325,6 +327,7 @@ module.exports.list = function (constraints, n) {
     }
     return master.constructor.__out__
 }
+})();
 /*
 TODO:
 change pk.nxt pk.out pk.n pk.stata. /pk\.[^.]* /
