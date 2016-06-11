@@ -86,9 +86,11 @@ b8 bounded;
 
 #include <signal.h>
 void rq(int sig){
+    if (!d.buf) {
     fputs("\ndump requested\n", stderr);
     if(!(d.buf=malloc(81*414))) die("RAM denied");
     memset(d.buf, 0, 81*414);
+    }
 }
 int dmp(s00d *s, int p, int v){
     char *eye;
@@ -381,6 +383,7 @@ int main(int argc, char **argv){
     }
 
     if(signal(SIGINT, rq)==SIG_ERR) fputs("could not enable dump feature\n", stderr);
+    if(signal(SIGPIPE, rq)==SIG_ERR) fputs("could not enable dump feature\n", stderr);
     else fputs("dump feature enabled\n", stderr);
 
     cnt=new(10);
