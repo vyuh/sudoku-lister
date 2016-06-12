@@ -65,7 +65,7 @@
         }
     };
     cell.prototype.putIdea = function (idea) {
-        this.v = (idea | open | pk.may_b[idea]);
+        this.v = (idea | open | may_b[idea]);
     };
     cell.prototype.copyIn = function (i) {
         this.v = i.v;
@@ -86,18 +86,18 @@
     };
     cell.prototype.rm = function (i) {
         // returns success or failure (false or true respectively)
-        if (this.yo(pk.may_b[i])) {
+        if (this.yo(may_b[i])) {
             //has it in probable
             if (!this.yo(pk.wait)) {
                 return true;
                 // it is the only probable!!
             }
-            this.reset(pk.may_b[i]);
+            this.reset(may_b[i]);
             this.v -= 1;
             if (this.yo(open)) {
                 // only one probable left now
                 for (i = 0; i < 9; i += 1) {
-                    if (this.yo(pk.may_b[i])) {
+                    if (this.yo(may_b[i])) {
                         break;
                     }
                 }
@@ -110,7 +110,7 @@
     cell.prototype.trial = function (i) {
         // returns trial value or >=9 if no trial available
         for (; i < 9; i += 1) {
-            if (this.yo(pk.may_b[i])) {
+            if (this.yo(may_b[i])) {
                 break;
             }
         }
@@ -121,7 +121,7 @@
     pk.wait = 0x20;
     var open = 0x10;
     pk.data = 0xf;
-    pk.may_b = [
+    var may_b = [
         0x4000, 0x2000, 0x1000,
         0x0800, 0x0400, 0x0200,
         0x0100, 0x0080, 0x0040
