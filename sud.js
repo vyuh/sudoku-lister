@@ -52,7 +52,7 @@ pk.may_b = [
     0x0800, 0x0400, 0x0200,
     0x0100, 0x0080, 0x0040
 ];
-pk.s00d = function (inp) {
+pk.sud = function (inp) {
 	if(inp) {
 		if(typeof inp === "object") {
 			this.left = inp.left
@@ -70,7 +70,7 @@ pk.s00d = function (inp) {
 	}
 	for(;i<81;i++) this.i_v[i] = new pk.cell()
 }
-pk.s00d.prototype.copyIn = function(t) {
+pk.sud.prototype.copyIn = function(t) {
 	this.left = t.left;
 	for(var i = 0; i<81; i++) this.i_v[i].copyIn(t.i_v[i]);
 }
@@ -157,19 +157,19 @@ pk.clr = [
 	[ 60, 61, 62, 34, 70, 72, 74, 76, 78, 80, 43, 25, 71, 69, 52, 7, 75, 77, 73, 16 ],
 	[ 60, 8, 62, 17, 35, 70, 72, 74, 76, 78, 44, 53, 69, 71, 73, 75, 77, 79, 61, 26 ]
 ]
-pk.s00d.prototype.first = function() { // first waiting cell or >=81; for ordered listing of solutions
+pk.sud.prototype.first = function() { // first waiting cell or >=81; for ordered listing of solutions
 	var i = 0
 	for(; i<81; i++) if(this.i_v[i].yo(pk.wait)) break 
 	return i
 }
-pk.s00d.prototype.idea = function() { //first open cell or >=81
+pk.sud.prototype.idea = function() { //first open cell or >=81
 	var i = 0
 	for (; i<81; i++) {
 		if (this.i_v[i].yo(pk.open)) break
 	}
 	return i
 }
-pk.s00d.prototype.toString = function() {
+pk.sud.prototype.toString = function() {
 	var buf = ''
 	for (var i=0; i<81; i++) {
 		if (this.i_v[i].yo(pk.cell.open)) buf += '?'
@@ -177,7 +177,7 @@ pk.s00d.prototype.toString = function() {
 	}
 	return buf;
 }
-pk.s00d.prototype.hook = function() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
+pk.sud.prototype.hook = function() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
 	var x, pos, val
 	while((pos = this.idea()) < 81) {
 		val = this.i_v[pos].value()
@@ -191,9 +191,9 @@ pk.s00d.prototype.hook = function() { // returns { wrong, stale, solved, dumping
 	}
 	return 0
 }
-pk.s00d.prototype.crook = function(){
+pk.sud.prototype.crook = function(){
 	var mc, cc, pos, val=0
-	var copy = new pk.s00d(this)
+	var copy = new pk.sud(this)
 	if((pos=this.first())<81) {
 		mc=this.i_v[pos]
 		cc=copy.i_v[pos]
@@ -218,14 +218,14 @@ pk.s00d.prototype.crook = function(){
 	copy = null
 	return 1
 }
-pk.s00d.prototype.squash = function(){
+pk.sud.prototype.squash = function(){
 	var ret
 	do if((ret=this.hook())!=0) return ret; while (0==(ret=this.crook()))
 	return ret
 }
     
 module.exports.solve = function(n, constraints) {
-	var master = new pk.s00d(constraints)
+	var master = new pk.sud(constraints)
 	pk.n = n || 2
 	switch(master.squash()) {
 		case -1:
@@ -237,7 +237,7 @@ module.exports.solve = function(n, constraints) {
 
 
 pk.list = function (inp, npc) {
-	pk.s00d.call(this, inp)
+	pk.sud.call(this, inp)
 	this.status = function(ls, pos, val) {
 		this.l = new pk.list(ls)
 		this.p = pos
@@ -256,7 +256,7 @@ pk.list = function (inp, npc) {
 
 // subclass extends superclass
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
-pk.list.prototype = Object.create(pk.s00d.prototype)
+pk.list.prototype = Object.create(pk.sud.prototype)
 pk.list.prototype.constructor = pk.list
 
 pk.list.prototype.hasNext = function() {
