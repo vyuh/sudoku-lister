@@ -116,7 +116,6 @@
         }
         return i;
     };
-    pk.cell = cell;
     //the package globals
     var wait = 0x20;
     var open = 0x10;
@@ -134,7 +133,7 @@
                 this.left = inp.left;
                 this.i_v = [];
                 for (var i = 0; i < 81; i += 1) {
-                    this.i_v[i] = new pk.cell(inp.i_v[i]);
+                    this.i_v[i] = new cell(inp.i_v[i]);
                 }
                 return;
             } else inp = inp.toString()
@@ -144,9 +143,9 @@
         this.i_v = []
         var i = 0
         for (; i < len && i < 81; i += 1) {
-            this.i_v[i] = new pk.cell(inp.charAt(i))
+            this.i_v[i] = new cell(inp.charAt(i))
         }
-        for (; i < 81; i += 1) this.i_v[i] = new pk.cell()
+        for (; i < 81; i += 1) this.i_v[i] = new cell()
         arguments.callee.__out__ = []
     }
     sud.prototype.copyIn = function (t) {
@@ -177,7 +176,7 @@
     sud.prototype.toString = function () {
         var buf = ''
         for (var i = 0; i < 81; i += 1) {
-            if (this.i_v[i].yo(pk.cell.open)) {
+            if (this.i_v[i].yo(open)) {
                 buf += '?';
             } else {
                 buf += (1 + this.i_v[i].value());
