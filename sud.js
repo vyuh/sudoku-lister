@@ -205,7 +205,7 @@
     }
     sud.prototype.crook = function () {
         var mc, cc, pos, val = 0
-        var copy = new pk.sud(this)
+        var copy = new sud(this)
         if ((pos = this.first()) < 81) {
             mc = this.i_v[pos]
             cc = copy.i_v[pos]
@@ -240,13 +240,12 @@
             if ((ret = this.hook()) !== 0) return ret;
         while (0 === (ret = this.crook())) return ret
     }
-    pk.sud = sud;
     //the list class. subclass of sud.
     //solution lister engine
     //an iterator
     var list = function (inp) {
         // calling superclass constructor
-        pk.sud.call(this, inp)
+        sud.call(this, inp)
         this.status = function (ls, pos, val) {
             this.l = new pk.list(ls)
             this.p = pos
@@ -262,7 +261,7 @@
     }
     // subclass extends superclass
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
-    list.prototype = Object.create(pk.sud.prototype)
+    list.prototype = Object.create(sud.prototype)
     list.prototype.constructor = list
     list.prototype.hook = function () {
         // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
@@ -345,7 +344,7 @@
         return new pk.list(constraints)
     }
     o.list = function (constraints, n) {
-        var master = new pk.sud(constraints)
+        var master = new sud(constraints)
         master.constructor.__n__ = n || 2;
         switch (master.squash()) {
         case -1:
