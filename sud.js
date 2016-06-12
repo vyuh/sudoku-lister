@@ -82,7 +82,7 @@
     };
     cell.prototype.value = function () {
         //value of an open or filled cell
-        return (this.v & pk.data);
+        return (this.v & data);
     };
     cell.prototype.rm = function (i) {
         // returns success or failure (false or true respectively)
@@ -120,7 +120,7 @@
     //the package globals
     pk.wait = 0x20;
     var open = 0x10;
-    pk.data = 0xf;
+    var data = 0xf;
     var may_b = [
         0x4000, 0x2000, 0x1000,
         0x0800, 0x0400, 0x0200,
