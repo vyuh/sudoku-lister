@@ -47,7 +47,7 @@
         return out;
     }
     //the cell class
-    pk.cell = function (i) {
+    var cell = function (i) {
         //cell object constructor
         if (i) {
             if (typeof i === "object") {
@@ -64,27 +64,27 @@
             this.v = 0x7fe7;
         }
     };
-    pk.cell.prototype.putIdea = function (idea) {
+    cell.prototype.putIdea = function (idea) {
         this.v = (idea | pk.open | pk.may_b[idea]);
     };
-    pk.cell.prototype.copyIn = function (i) {
+    cell.prototype.copyIn = function (i) {
         this.v = i.v;
     };
-    pk.cell.prototype.txt = function () {
+    cell.prototype.txt = function () {
         return this.v.toString();
     };
-    pk.cell.prototype.yo = function (mask) {
+    cell.prototype.yo = function (mask) {
         return ((this.v & mask) !== 0);
     };
-    pk.cell.prototype.reset = function (mask) {
+    cell.prototype.reset = function (mask) {
         //reset the mask
         this.v &= ~mask;
     };
-    pk.cell.prototype.value = function () {
+    cell.prototype.value = function () {
         //value of an open or filled cell
         return (this.v & pk.data);
     };
-    pk.cell.prototype.rm = function (i) {
+    cell.prototype.rm = function (i) {
         // returns success or failure (false or true respectively)
         if (this.yo(pk.may_b[i])) {
             //has it in probable
@@ -107,7 +107,7 @@
         return false;
         //removed ok
     };
-    pk.cell.prototype.trial = function (i) {
+    cell.prototype.trial = function (i) {
         // returns trial value or >=9 if no trial available
         for (; i < 9; i += 1) {
             if (this.yo(pk.may_b[i])) {
@@ -116,6 +116,7 @@
         }
         return i;
     };
+    pk.cell = cell;
     //the package globals
     pk.wait = 0x20;
     pk.open = 0x10;
@@ -127,7 +128,7 @@
     ];
     pk.clr = scope_gen(3);
     //the sud class. models a sudoku
-    pk.sud = function (inp) {
+    var sud = function (inp) {
         if (inp) {
             if (typeof inp === "object") {
                 this.left = inp.left;
@@ -148,12 +149,12 @@
         for (; i < 81; i += 1) this.i_v[i] = new pk.cell()
         arguments.callee.__out__ = []
     }
-    pk.sud.prototype.copyIn = function (t) {
+    sud.prototype.copyIn = function (t) {
         this.left = t.left;
         for (var i = 0; i < 81; i += 1) this.i_v[i].copyIn(t.i_v[
             i]);
     }
-    pk.sud.prototype.first = function () {
+    sud.prototype.first = function () {
         // first waiting cell or >=81; for ordered listing of solutions
         var i = 0
         for (; i < 81; i += 1) {
@@ -163,7 +164,7 @@
         }
         return i
     }
-    pk.sud.prototype.idea = function () {
+    sud.prototype.idea = function () {
         //first open cell or >=81
         var i = 0
         for (; i < 81; i += 1) {
@@ -173,7 +174,7 @@
         }
         return i
     }
-    pk.sud.prototype.toString = function () {
+    sud.prototype.toString = function () {
         var buf = ''
         for (var i = 0; i < 81; i += 1) {
             if (this.i_v[i].yo(pk.cell.open)) {
@@ -184,7 +185,7 @@
         }
         return buf;
     }
-    pk.sud.prototype.hook = function () {
+    sud.prototype.hook = function () {
         // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
         var x, pos, val
         while ((pos = this.idea()) < 81) {
@@ -203,7 +204,7 @@
         }
         return 0
     }
-    pk.sud.prototype.crook = function () {
+    sud.prototype.crook = function () {
         var mc, cc, pos, val = 0
         var copy = new pk.sud(this)
         if ((pos = this.first()) < 81) {
@@ -234,16 +235,17 @@
         copy = null
         return 1
     }
-    pk.sud.prototype.squash = function () {
+    sud.prototype.squash = function () {
         var ret
         do
             if ((ret = this.hook()) !== 0) return ret;
         while (0 === (ret = this.crook())) return ret
     }
+    pk.sud = sud;
     //the list class. subclass of sud.
     //solution lister engine
     //an iterator
-    pk.list = function (inp) {
+    var list = function (inp) {
         // calling superclass constructor
         pk.sud.call(this, inp)
         this.status = function (ls, pos, val) {
@@ -261,9 +263,9 @@
     }
     // subclass extends superclass
     // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/create
-    pk.list.prototype = Object.create(pk.sud.prototype)
-    pk.list.prototype.constructor = pk.list
-    pk.list.prototype.hook = function () {
+    list.prototype = Object.create(pk.sud.prototype)
+    list.prototype.constructor = list
+    list.prototype.hook = function () {
         // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
         var x, pos, val
         if (pk.stata) {
@@ -289,7 +291,7 @@
         }
         return 0
     }
-    pk.list.prototype.crook = function () {
+    list.prototype.crook = function () {
         var mc, cc, pos, val = 0,
             copy
         if (pk.stata) {
@@ -325,16 +327,17 @@
         }
         return 1
     }
-    pk.list.prototype.next = function () {
+    list.prototype.next = function () {
         if (pk.nxt.length === 0) return undefined
         pk.out = pk.nxt
         pk.nxt = []
         this.squash()
         return pk.out
     }
-    pk.list.prototype.hasNext = function () {
+    list.prototype.hasNext = function () {
         return pk.nxt.length !== 0;
     }
+    pk.list = list;
     //exports
 
     var o = {};
