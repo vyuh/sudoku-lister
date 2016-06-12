@@ -247,7 +247,7 @@
         // calling superclass constructor
         sud.call(this, inp)
         this.status = function (ls, pos, val) {
-            this.l = new pk.list(ls)
+            this.l = new list(ls)
             this.p = pos
             this.v = val
         }
@@ -335,13 +335,12 @@
     list.prototype.hasNext = function () {
         return pk.nxt.length !== 0;
     }
-    pk.list = list;
     //exports
 
     var o = {};
     o.iter = function (constraints, n) {
         pk.n = n || 2
-        return new pk.list(constraints)
+        return new list(constraints)
     }
     o.list = function (constraints, n) {
         var master = new sud(constraints)
