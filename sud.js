@@ -65,7 +65,7 @@
         }
     };
     cell.prototype.putIdea = function (idea) {
-        this.v = (idea | pk.open | pk.may_b[idea]);
+        this.v = (idea | open | pk.may_b[idea]);
     };
     cell.prototype.copyIn = function (i) {
         this.v = i.v;
@@ -94,7 +94,7 @@
             }
             this.reset(pk.may_b[i]);
             this.v -= 1;
-            if (this.yo(pk.open)) {
+            if (this.yo(open)) {
                 // only one probable left now
                 for (i = 0; i < 9; i += 1) {
                     if (this.yo(pk.may_b[i])) {
@@ -119,7 +119,7 @@
     pk.cell = cell;
     //the package globals
     pk.wait = 0x20;
-    pk.open = 0x10;
+    var open = 0x10;
     pk.data = 0xf;
     pk.may_b = [
         0x4000, 0x2000, 0x1000,
@@ -168,7 +168,7 @@
         //first open cell or >=81
         var i = 0
         for (; i < 81; i += 1) {
-            if (this.i_v[i].yo(pk.open)) {
+            if (this.i_v[i].yo(open)) {
                 break
             }
         }
@@ -195,7 +195,7 @@
                     return -1;
                 }
             }
-            this.i_v[pos].reset(pk.open)
+            this.i_v[pos].reset(open)
             if ((this.left -= 1) === 0) {
                 this.constructor.__out__.push(this.toString())
                 return this.constructor.__out__.length === this.constructor
@@ -279,7 +279,7 @@
             for (x = 0; x < 20; x += 1) {
                 if (this.i_v[pk.clr[pos][x]].rm(val)) return -1
             } // try removing braces
-            this.i_v[pos].reset(pk.open)
+            this.i_v[pos].reset(open)
             if ((this.left -= 1) === 0) {
                 pk.nxt.push(this.toString())
                 if (pk.nxt.length === pk.n) {
