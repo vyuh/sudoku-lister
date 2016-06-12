@@ -245,6 +245,7 @@
     //an iterator
     var nxt = [];
     var N;
+    var stata = false;
     var list = function (inp) {
         // calling superclass constructor
         sud.call(this, inp)
@@ -268,9 +269,9 @@
     list.prototype.hook = function () {
         // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
         var x, pos, val
-        if (pk.stata) {
-            if (pk.stata.length === 0) {
-                delete pk.stata
+        if (stata) {
+            if (stata.length === 0) {
+                stata = false;
                 return 1
             } else return 0
         }
@@ -283,7 +284,7 @@
             if ((this.left -= 1) === 0) {
                 nxt.push(this.toString())
                 if (nxt.length === N) {
-                    pk.stata = []
+                    stata = []
                     // i hope empty array is true in js
                     return 2
                 } else return 1
@@ -294,8 +295,8 @@
     list.prototype.crook = function () {
         var mc, cc, pos, val = 0,
             copy
-        if (pk.stata) {
-            copy = pk.stata.pop();
+        if (stata) {
+            copy = stata.pop();
             mc = this.i_v[copy.p];
             cc = copy.l.i_v[copy.p];
         } else {
@@ -306,8 +307,8 @@
                 cc = copy.l.i_v[copy.p]
             }
         }
-        while (pk.stata || ((copy.v = mc.trial(copy.v)) < 9)) {
-            if (!pk.stata) {
+        while (stata || ((copy.v = mc.trial(copy.v)) < 9)) {
+            if (!stata) {
                 copy.l.copyIn(this);
                 cc.putIdea(copy.v);
             }
@@ -316,7 +317,7 @@
                 copy.v += 1;
                 break;
             case 2:
-                pk.stata.push(copy);
+                stata.push(copy);
                 return 2;
             case -1:
                 mc.rm(copy.v); /* should i check? */
