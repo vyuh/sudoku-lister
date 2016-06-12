@@ -88,7 +88,7 @@
         // returns success or failure (false or true respectively)
         if (this.yo(may_b[i])) {
             //has it in probable
-            if (!this.yo(pk.wait)) {
+            if (!this.yo(wait)) {
                 return true;
                 // it is the only probable!!
             }
@@ -118,7 +118,7 @@
     };
     pk.cell = cell;
     //the package globals
-    pk.wait = 0x20;
+    var wait = 0x20;
     var open = 0x10;
     var data = 0xf;
     var may_b = [
@@ -158,7 +158,7 @@
         // first waiting cell or >=81; for ordered listing of solutions
         var i = 0
         for (; i < 81; i += 1) {
-            if (this.i_v[i].yo(pk.wait)) {
+            if (this.i_v[i].yo(wait)) {
                 break;
             }
         }
