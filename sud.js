@@ -243,6 +243,7 @@
     //the list class. subclass of sud.
     //solution lister engine
     //an iterator
+    var nxt = [];
     var list = function (inp) {
         // calling superclass constructor
         sud.call(this, inp)
@@ -252,7 +253,7 @@
             this.v = val
         }
         if (typeof inp === 'object') return
-        pk.nxt = []
+        nxt = []
         switch (this.squash()) {
         case -1:
             break
@@ -279,8 +280,8 @@
             } // try removing braces
             this.i_v[pos].reset(open)
             if ((this.left -= 1) === 0) {
-                pk.nxt.push(this.toString())
-                if (pk.nxt.length === pk.n) {
+                nxt.push(this.toString())
+                if (nxt.length === pk.n) {
                     pk.stata = []
                     // i hope empty array is true in js
                     return 2
@@ -326,14 +327,14 @@
         return 1
     }
     list.prototype.next = function () {
-        if (pk.nxt.length === 0) return undefined
-        pk.out = pk.nxt
-        pk.nxt = []
+        if (nxt.length === 0) return undefined
+        pk.out = nxt
+        nxt = []
         this.squash()
         return pk.out
     }
     list.prototype.hasNext = function () {
-        return pk.nxt.length !== 0;
+        return nxt.length !== 0;
     }
     //exports
 
