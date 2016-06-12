@@ -15,7 +15,6 @@
     global[name] = theModule;
   }
 })('sud', function () {
-    var pk = {};
 
     function scope_gen(n) {
         // for normal sudoku latin square, n is 3
