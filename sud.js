@@ -244,6 +244,7 @@
     //solution lister engine
     //an iterator
     var nxt = [];
+    var N;
     var list = function (inp) {
         // calling superclass constructor
         sud.call(this, inp)
@@ -281,7 +282,7 @@
             this.i_v[pos].reset(open)
             if ((this.left -= 1) === 0) {
                 nxt.push(this.toString())
-                if (nxt.length === pk.n) {
+                if (nxt.length === N) {
                     pk.stata = []
                     // i hope empty array is true in js
                     return 2
@@ -341,7 +342,7 @@
 
     var o = {};
     o.iter = function (constraints, n) {
-        pk.n = n || 2
+        N = n || 2
         return new list(constraints)
     }
     o.list = function (constraints, n) {
