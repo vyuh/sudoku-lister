@@ -126,7 +126,7 @@
         0x0800, 0x0400, 0x0200,
         0x0100, 0x0080, 0x0040
     ];
-    pk.clr = scope_gen(3);
+    var clr = scope_gen(3);
     //the sud class. models a sudoku
     var sud = function (inp) {
         if (inp) {
@@ -191,7 +191,7 @@
         while ((pos = this.idea()) < 81) {
             val = this.i_v[pos].value()
             for (x = 0; x < 20; x += 1) {
-                if (this.i_v[pk.clr[pos][x]].rm(val)) {
+                if (this.i_v[clr[pos][x]].rm(val)) {
                     return -1;
                 }
             }
@@ -277,7 +277,7 @@
         while ((pos = this.idea()) < 81) {
             val = this.i_v[pos].value()
             for (x = 0; x < 20; x += 1) {
-                if (this.i_v[pk.clr[pos][x]].rm(val)) return -1
+                if (this.i_v[clr[pos][x]].rm(val)) return -1
             } // try removing braces
             this.i_v[pos].reset(open)
             if ((this.left -= 1) === 0) {
