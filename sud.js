@@ -326,12 +326,13 @@
         }
         return 1
     }
+    var out;
     list.prototype.next = function () {
         if (nxt.length === 0) return undefined
-        pk.out = nxt
+        out = nxt
         nxt = []
         this.squash()
-        return pk.out
+        return out
     }
     list.prototype.hasNext = function () {
         return nxt.length !== 0;
