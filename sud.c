@@ -460,6 +460,10 @@ int
 squash (s00d * puzl)
 {
   int ret;
+  /* TODO make an alternative method.
+   * that does only one solution per call
+   * call it try_again or next
+   */
   do
     if (ret = hook (puzl))
       return ret;
