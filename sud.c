@@ -463,6 +463,16 @@ squash (s00d * puzl)
   /* TODO make an alternative method.
    * that does only one solution per call
    * call it try_again or next
+   *
+   * REF: SICP section 3.5
+   * just remember that the thing this method
+   * generates is not a pure stream! it mutates
+   * the object it is called with!
+   * whenever `guess` function finds
+   * that the probable it chose
+   * can not produce any valid solution. it
+   * _removes that probable from original structure_
+   * and calls ` hook` function on it.
    */
   do
     if (ret = hook (puzl))
