@@ -48,7 +48,7 @@ class cell {
     boolean rm(byte i) { // returns success or failure (false or true respectively)
         if (may_be(i)) { //has it in probable
             if (!yo(wait)) return true; // it is the only probable!!
-            v&=~may_b[i];
+            reset(may_b[i]);
             v--;
             if(yo(open)) {// only one probable left now
                 for(i=0; i<9; i++) if(may_be(i)) break;
