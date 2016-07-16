@@ -210,7 +210,7 @@ class s00d {
         }
         return 0;
     }
-    int crook(){
+    int crook(){ // returns { hint_found, solved_all, dumping } = 0, 1, 2
         s00d copy;
         cell mc, cc;
         byte pos, val=0;
@@ -239,7 +239,7 @@ class s00d {
         copy = null;
         return 1;
     }
-    int squash(){
+    int squash(){ // returns { wrong, solved_all, dumping } = -1, 1, 2
         int ret;
         do if((ret=hook())!=0) return ret; while (0==(ret=crook()));
         return ret;
