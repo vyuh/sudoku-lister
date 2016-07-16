@@ -36,6 +36,9 @@ class cell {
         if((v&mask)!=0) return true;
         else return false;
     }
+    boolean may_be(byte i) {
+        return yo(may_b[i]);
+    }
     void reset(short mask) { //reset the mask
         v&=~mask;
     }
@@ -43,19 +46,19 @@ class cell {
         return (byte)(v&data);
     }
     boolean rm(byte i) { // returns success or failure (false or true respectively)
-        if (yo(may_b[i])) { //has it in probable
+        if (may_be(i)) { //has it in probable
             if (!yo(wait)) return true; // it is the only probable!!
             v&=~may_b[i];
             v--;
             if(yo(open)) {// only one probable left now
-                for(i=0; i<9; i++) if(yo(may_b[i])) break;
+                for(i=0; i<9; i++) if(may_be(i)) break;
                 putIdea(i);
             }
         }
         return false; //removed ok
     }
     byte trial(byte i) { // returns trial value or >=9 if no trial available
-        for(; i<9; i++) if(yo(may_b[i])) break;
+        for(; i<9; i++) if(may_be(i)) break;
         return i;
     }
 }
