@@ -42,6 +42,9 @@ class cell {
     boolean waiting() {
         return yo(wait);
     }
+    boolean is_open() {
+        return yo(open);
+    }
     void reset(short mask) { //reset the mask
         v&=~mask;
     }
@@ -53,7 +56,7 @@ class cell {
             if (!waiting()) return true; // it is the only probable!!
             reset(may_b[i]);
             v--;
-            if(yo(open)) {// only one probable left now
+            if(is_open()) {// only one probable left now
                 for(i=0; i<9; i++) if(may_be(i)) break;
                 putIdea(i);
             }
@@ -177,14 +180,14 @@ class s00d {
     
     byte idea() { //first open cell or >=81
         byte i = 0;
-        for (; i<81; i++) if (i_v[i].yo(cell.open)) break;
+        for (; i<81; i++) if (i_v[i].is_open()) break;
         return i;
     }
     public String toString(){
         byte i;
         StringBuilder buf = new StringBuilder(81);
         for (i=0; i<81; i++) {
-            if (i_v[i].yo(cell.open)) buf.append('?');
+            if (i_v[i].is_open()) buf.append('?');
             else buf.append(1+i_v[i].value());
         }
         return buf.toString();
