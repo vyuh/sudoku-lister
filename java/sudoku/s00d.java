@@ -32,9 +32,18 @@ class cell {
     String txt() { //for non semantic dump. though portable.
         return ""+v;
     }
-    boolean yo(short mask) { //the mask set or not
+    boolean test_mask(short mask) { //the mask set or not
         if((v&mask)!=0) return true;
         else return false;
+    }
+    boolean may_be(byte i) {
+        return test_mask(may_b[i]);
+    }
+    boolean waiting() {
+        return test_mask(wait);
+    }
+    boolean is_open() {
+        return test_mask(open);
     }
     void reset(short mask) { //reset the mask
         v&=~mask;
@@ -43,19 +52,19 @@ class cell {
         return (byte)(v&data);
     }
     boolean rm(byte i) { // returns success or failure (false or true respectively)
-        if (yo(may_b[i])) { //has it in probable
-            if (!yo(wait)) return true; // it is the only probable!!
-            v&=~may_b[i];
+        if (may_be(i)) { //has it in probable
+            if (!waiting()) return true; // it is the only probable!!
+            reset(may_b[i]);
             v--;
-            if(yo(open)) {// only one probable left now
-                for(i=0; i<9; i++) if(yo(may_b[i])) break;
-                v = (short)(i|open|may_b[i]);
+            if(is_open()) {// only one probable left now
+                for(i=0; i<9; i++) if(may_be(i)) break;
+                putIdea(i);
             }
         }
         return false; //removed ok
     }
     byte trial(byte i) { // returns trial value or >=9 if no trial available
-        for(; i<9; i++) if(yo(may_b[i])) break;
+        for(; i<9; i++) if(may_be(i)) break;
         return i;
     }
 }
@@ -148,13 +157,13 @@ class s00d {
     };
     byte first() { // first waiting cell or >=81; for ordered listing of solutions
         byte i = 0;
-        for(; i<81; i++) if(i_v[i].yo(cell.wait)) break;
+        for(; i<81; i++) if(i_v[i].waiting()) break;
         return i;
     }
     byte best() { // best waiting cell or >=81; first() substitute for fast first convergence
         byte i=0, level=9, b=81;
         for(; i<81; i++) {
-            if(i_v[i].yo(cell.wait)) {
+            if(i_v[i].waiting()) {
                 if(i_v[i].value()<level) {
                     level=(byte)i_v[i].value();
                     b=i;
@@ -171,14 +180,14 @@ class s00d {
     
     byte idea() { //first open cell or >=81
         byte i = 0;
-        for (; i<81; i++) if (i_v[i].yo(cell.open)) break;
+        for (; i<81; i++) if (i_v[i].is_open()) break;
         return i;
     }
     public String toString(){
         byte i;
         StringBuilder buf = new StringBuilder(81);
         for (i=0; i<81; i++) {
-            if (i_v[i].yo(cell.open)) buf.append('?');
+            if (i_v[i].is_open()) buf.append('?');
             else buf.append(1+i_v[i].value());
         }
         return buf.toString();
