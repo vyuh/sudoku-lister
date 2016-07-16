@@ -39,6 +39,9 @@ class cell {
     boolean may_be(byte i) {
         return yo(may_b[i]);
     }
+    boolean waiting() {
+        return yo(wait);
+    }
     void reset(short mask) { //reset the mask
         v&=~mask;
     }
@@ -47,7 +50,7 @@ class cell {
     }
     boolean rm(byte i) { // returns success or failure (false or true respectively)
         if (may_be(i)) { //has it in probable
-            if (!yo(wait)) return true; // it is the only probable!!
+            if (!waiting()) return true; // it is the only probable!!
             reset(may_b[i]);
             v--;
             if(yo(open)) {// only one probable left now
@@ -151,13 +154,13 @@ class s00d {
     };
     byte first() { // first waiting cell or >=81; for ordered listing of solutions
         byte i = 0;
-        for(; i<81; i++) if(i_v[i].yo(cell.wait)) break;
+        for(; i<81; i++) if(i_v[i].waiting()) break;
         return i;
     }
     byte best() { // best waiting cell or >=81; first() substitute for fast first convergence
         byte i=0, level=9, b=81;
         for(; i<81; i++) {
-            if(i_v[i].yo(cell.wait)) {
+            if(i_v[i].waiting()) {
                 if(i_v[i].value()<level) {
                     level=(byte)i_v[i].value();
                     b=i;
