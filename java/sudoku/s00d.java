@@ -32,18 +32,18 @@ class cell {
     String txt() { //for non semantic dump. though portable.
         return ""+v;
     }
-    boolean yo(short mask) { //the mask set or not
+    boolean test_mask(short mask) { //the mask set or not
         if((v&mask)!=0) return true;
         else return false;
     }
     boolean may_be(byte i) {
-        return yo(may_b[i]);
+        return test_mask(may_b[i]);
     }
     boolean waiting() {
-        return yo(wait);
+        return test_mask(wait);
     }
     boolean is_open() {
-        return yo(open);
+        return test_mask(open);
     }
     void reset(short mask) { //reset the mask
         v&=~mask;
