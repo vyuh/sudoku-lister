@@ -51,6 +51,9 @@ class cell {
         // mutation
         v&=~mask;
     }
+    void lock() {
+        reset(open);
+    }
     byte value(){ //value of an open or filled cell
         return (byte)(v&data);
     }
@@ -205,7 +208,7 @@ class s00d {
             for(x=0; x<20; x++) {       
                  if(i_v[clr[pos][x]].rm(val)) return -1;
             }
-            i_v[pos].reset(cell.open);
+            i_v[pos].lock();
             if (--left == 0) {
                 System.out.println(toString());
                 n--; if(n==0) return 2;
@@ -366,7 +369,7 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
             for(x=0; x<20; x++) {       
                  if(i_v[clr[pos][x]].rm(val)) return -1;
             }
-            i_v[pos].reset(cell.open);
+            i_v[pos].lock();
             if (--left == 0) {
                 nxt.append(toString()+"\n");
                 d++;
