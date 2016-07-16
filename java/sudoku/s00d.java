@@ -49,7 +49,7 @@ class cell {
             v--;
             if(yo(open)) {// only one probable left now
                 for(i=0; i<9; i++) if(yo(may_b[i])) break;
-                v = (short)(i|open|may_b[i]);
+                putIdea(i);
             }
         }
         return false; //removed ok
