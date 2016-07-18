@@ -64,8 +64,8 @@ int scope_gen (unsigned char scope[81 * 20]) {
     scope_seive[i] = 0;
     for (j = 0; j < 81; j++)
       if (scope_seive[j]) {
-	*eye = j;
-	eye++;
+        *eye = j;
+        eye++;
       }
   }
   return 0;
@@ -106,8 +106,8 @@ int sudoku_dump (sudoku * s, int p, int v) {
   eye += 3;
   l += sprintf (eye, "%02x\n", v);
 
-  return l;			/* the characters written d.position to be
-				   incremented outside */
+  return l;                     /* the characters written d.position to be
+                                   incremented outside */
 }
 int burn (sudoku_state * n) {
   for (; n >= d.stack; n--)
@@ -130,9 +130,9 @@ int dumpfile_try_read () {
   if (!(d.buffer = (char *) malloc (81 * 414)))
     die ("RAM denied\n");
   memset (d.buffer, 0, 81 * 414);
-  depth = fread (d.buffer, 414, 81, dumpfile);	/* if CRLF & fread doesnt
-						   copy the last incomplete
-						   line */
+  depth = fread (d.buffer, 414, 81, dumpfile);  /* if CRLF & fread doesnt
+                                                   copy the last incomplete
+                                                   line */
   fclose (dumpfile);
   if (!depth)
     return 1;
@@ -150,7 +150,7 @@ int dumpfile_try_read () {
     for (i = 0, this = line, eye = now->s->i_v; i < 81; i++, eye++) {
       *eye = (unsigned short) strtoul (this, &nxt, 16);
       if ((this + 5 != nxt) && (i != 0 || (this + 4 != nxt)))
-	return burn (now);
+        return burn (now);
       this = nxt;
     }
     now->s->left = (unsigned char) strtoul (this, &nxt, 16);
@@ -211,13 +211,13 @@ int add (iint * eye, unsigned long x) {
   return ret;
 }
 
-int vyu (char *eye, iint * num) {
+int iint_to_string (char *eye, iint * num) {
   static char zp_lu[7];
   unsigned i;
   i = num->n;
   sprintf (zp_lu, "%%0%lulx", 2 * sizeof (unsigned long));
   while (i--)
-    eye += sprintf (eye, zp_lu, cnt->i[i]);	/* woah! */
+    eye += sprintf (eye, zp_lu, cnt->i[i]);     /* woah! */
   strcat (eye, "\n");
   return 0;
 }
@@ -278,8 +278,8 @@ int rm (unsigned short *eye, unsigned char v) {
     (*eye)--;
     if ((*eye) & open) {
       for (v = 0; v < 9; v++)
-	if ((*eye) & may_b[v])
-	  break;
+        if ((*eye) & may_b[v])
+          break;
       (*eye) = ((unsigned short) v) | open | may_b[v];
     }
   }
@@ -306,19 +306,19 @@ int hook (sudoku * puzl) {
   while (idea (puzl, &pos, &val)) {
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
       if (rm (&(puzl->i_v[*eye]), val))
-	return -1;
+        return -1;
     }
     puzl->i_v[pos] &= (~open);
     if (!(--(puzl->left))) {
       sudoku_to_string (out, puzl);
       fputs (out, stdout);
-      add (cnt, 1L);		/* cant possibly overflow, should i check? */
+      add (cnt, 1L);            /* cant possibly overflow, should i check? */
       if (d.buffer) {
-	d.position = 0;
-	return 2;
+        d.position = 0;
+        return 2;
       }
       else
-	return 1;
+        return 1;
     }
   }
   return 0;
@@ -359,11 +359,11 @@ int crook (sudoku * master) {
       d.position += sudoku_dump (copy, (int) pos, (int) val);
       return 2;
     case -1:
-      rm (mc, val);		/* should i check? */
+      rm (mc, val);             /* should i check? */
       ;
       if (idea (master, &pos, &dummy) && (dummy > val)) {
-	free (copy);
-	return 0;
+        free (copy);
+        return 0;
       }
     }
   }
@@ -434,7 +434,7 @@ int main (int argc, char **argv) {
   free (master);
 
   *out = '#';
-  vyu (out + 1, cnt);		/* haha! passing a global :D */
+  iint_to_string (out + 1, cnt);        /* haha! passing a global :D */
   fputs (out, stderr);
 
   return 0;
