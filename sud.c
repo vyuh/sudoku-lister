@@ -73,36 +73,37 @@ typedef struct {
     int v;
 } sudoku_state;
 struct {
-    char *buf;
+    char *buffer;
+    int position;
+
     sudoku_state *stack;
     int top;
-    int pos;
 } d;
 #include <signal.h>
 void rq(int sig){
     fputs("\ndump requested\n", stderr);
-    if(!(d.buf=malloc(81*414))) die("RAM denied");
-    memset(d.buf, 0, 81*414);
+    if(!(d.buffer=malloc(81*414))) die("RAM denied");
+    memset(d.buffer, 0, 81*414);
 }
 int dmp(sudoku *s, int p, int v){
     char *eye;
     unsigned short *sun;
     int l;
 
-    for(l=0, eye=d.buf+d.pos, sun=s->i_v; l<405; sun++, eye+=5) l+=sprintf(eye, "%04x ", (int)*sun);
+    for(l=0, eye=d.buffer+d.position, sun=s->i_v; l<405; sun++, eye+=5) l+=sprintf(eye, "%04x ", (int)*sun);
 
     l+=sprintf(eye, "%02x ", (int)s->left); eye+=3;
     l+=sprintf(eye, "%02x ", p); eye+=3;
     l+=sprintf(eye, "%02x\n", v);
 
-    return l; /* the characters written d.pos to be incremented outside */
+    return l; /* the characters written d.position to be incremented outside */
 }
 int burn(sudoku_state *n){
     for(;n>=d.stack;n--) free(n->s);
     free(d.stack);
     d.stack=0;
-    free(d.buf);
-    d.buf=0;
+    free(d.buffer);
+    d.buffer=0;
     return 1;
 }
 int rd(){
@@ -113,16 +114,16 @@ int rd(){
     sudoku_state *now;
 
     if(!(dump=fopen("dump", "rb"))) return 2;
-    if(!(d.buf=(char *)malloc(81*414))) die("RAM denied\n");
-    memset(d.buf, 0, 81*414);
-    depth=fread(d.buf, 414, 81, dump); /* if CRLF & fread doesnt copy the last incomplete line */
+    if(!(d.buffer=(char *)malloc(81*414))) die("RAM denied\n");
+    memset(d.buffer, 0, 81*414);
+    depth=fread(d.buffer, 414, 81, dump); /* if CRLF & fread doesnt copy the last incomplete line */
     fclose(dump);
     if(!depth) return 1;
 
     if(!(d.stack=(sudoku_state *)malloc(sizeof(sudoku_state)*depth))) die("RAM denied\n");
     memset(d.stack, 0, sizeof(sudoku_state)*depth);
 
-    line=strtok(d.buf,"\r\n");
+    line=strtok(d.buffer,"\r\n");
     d.top=0;
     while(line&&depth){
         now=d.stack+d.top;
@@ -144,8 +145,8 @@ int rd(){
         d.top++;
         depth--;
     }
-    free(d.buf);
-    d.buf=0;
+    free(d.buffer);
+    d.buffer=0;
     return 0;
 }
 
@@ -212,11 +213,11 @@ void sudoku_init(char *in, sudoku *puzl) {
     }
     for(;i<81;i++,eye++) *eye = 0x7fe7;
 }
-void sudoku_to_string(char *buf, sudoku *puzl) {
+void sudoku_to_string(char *buffer, sudoku *puzl) {
     unsigned short *sun;
     char *eye;
     unsigned char i;
-    eye=buf;
+    eye=buffer;
     for (sun=puzl->i_v, i=0; i<81; i++, sun++, eye++) {
         if ((*sun) & open) *eye = '?';
         else *eye = (unsigned char)('1' + ((*sun) & data));
@@ -270,8 +271,8 @@ int hook(sudoku *puzl) {
             sudoku_to_string(out,puzl);
             fputs(out ,stdout);
             add(cnt,1L); /* cant possibly overflow, should i check? */
-            if(d.buf){
-                d.pos=0;
+            if(d.buffer){
+                d.position=0;
                 return 2;
             } else return 1;
         }
@@ -306,7 +307,7 @@ int crook(sudoku *master) {
             val++;
             break;
             case 2:
-            d.pos+=dmp(copy, (int)pos, (int)val);
+            d.position+=dmp(copy, (int)pos, (int)val);
             return 2;
             case -1:
             rm(mc,val); /* should i check? */
@@ -334,9 +335,9 @@ int main(int argc, char **argv){
     char *in;
     FILE *dump;
 
-    d.buf=0;
+    d.buffer=0;
     d.stack=0;
-    d.pos=d.top=-1;
+    d.position=d.top=-1;
 
     scope_gen(scope);
 
@@ -367,9 +368,9 @@ int main(int argc, char **argv){
         dmp(master,10,10);
         if(!(dump=fopen("dump","wb"))) die("couldn't create dumpfile\n");
         /* rather dump to stderr */
-        fputs(d.buf, dump);
+        fputs(d.buffer, dump);
         fclose(dump);
-        free(d.buf);
+        free(d.buffer);
     }
     free(master);
 
