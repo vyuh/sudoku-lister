@@ -28,36 +28,34 @@ void die(char *msg){
     exit(0);
 }
 
-typedef unsigned char b8;
-typedef unsigned short b16;
 typedef struct {
-    b16 i_v[81];
-    b8 left;
-} s00d;
-b16 wait=0x20;
-b16 open=0x10;
-b16 may_b[9]={
+    unsigned short i_v[81];
+    unsigned char left;
+} sudoku;
+unsigned short wait=0x20;
+unsigned short open=0x10;
+unsigned short may_b[9]={
     0x4000, 0x2000, 0x1000,
     0x0800, 0x0400, 0x0200,
     0x0100, 0x0080, 0x0040
 };
-b16 data=0xf;
+unsigned short data=0xf;
 
 #include <string.h>
 
-int scope_gen(b8 clr[81*20]){
-   b8 i, j,
+int scope_gen(unsigned char clr[81*20]){
+   unsigned char i, j,
       r, c, gr, gc;
-   b8 *eye;
-   b8 scope[81];
+   unsigned char *eye;
+   unsigned char scope[81];
    /* malloc from stdlib.h */
    for (i=0, eye=clr;i<81;i++) {
-      memset(scope, 0, 81*sizeof(b8));
+      memset(scope, 0, 81*sizeof(unsigned char));
       /* from string.h */
       r=i/(9);
       c=i%(9);
       gr=(r/3)*3;
-      gc=(c/3)*3;   
+      gc=(c/3)*3;
       for (j=0; j<9; j++) {
          scope[r*9+j]++;
          scope[j*9+c]++;
@@ -68,9 +66,9 @@ int scope_gen(b8 clr[81*20]){
    }
    return 0;
 }
-b8 clr[81*20];
+unsigned char clr[81*20];
 typedef struct {
-    s00d *s;
+    sudoku *s;
     int p;
     int v;
 } state;
@@ -86,9 +84,9 @@ void rq(int sig){
     if(!(d.buf=malloc(81*414))) die("RAM denied");
     memset(d.buf, 0, 81*414);
 }
-int dmp(s00d *s, int p, int v){
+int dmp(sudoku *s, int p, int v){
     char *eye;
-    b16 *sun;
+    unsigned short *sun;
     int l;
 
     for(l=0, eye=d.buf+d.pos, sun=s->i_v; l<405; sun++, eye+=5) l+=sprintf(eye, "%04x ", (int)*sun);
@@ -97,7 +95,7 @@ int dmp(s00d *s, int p, int v){
     l+=sprintf(eye, "%02x ", p); eye+=3;
     l+=sprintf(eye, "%02x\n", v);
 
-    return l;//the characters written d.pos to be incremented outside
+    return l; /* the characters written d.pos to be incremented outside */
 }
 int burn(state *n){
     for(;n>=d.stack;n--) free(n->s);
@@ -111,13 +109,13 @@ int rd(){
     FILE *dump;
     int depth, i;
     char *line, *this, *nxt;
-    b16 *eye;
+    unsigned short *eye;
     state *now;
 
     if(!(dump=fopen("dump", "rb"))) return 2;
     if(!(d.buf=(char *)malloc(81*414))) die("RAM denied\n");
     memset(d.buf, 0, 81*414);
-    depth=fread(d.buf, 414, 81, dump); //if CRLF & fread doesnt copy the last incomplete line
+    depth=fread(d.buf, 414, 81, dump); /* if CRLF & fread doesnt copy the last incomplete line */
     fclose(dump);
     if(!depth) return 1;
 
@@ -128,19 +126,19 @@ int rd(){
     d.top=0;
     while(line&&depth){
         now=d.stack+d.top;
-        if(!(now->s=(s00d *)malloc(sizeof(s00d)))) die("RAM denied\n");
+        if(!(now->s=(sudoku *)malloc(sizeof(sudoku)))) die("RAM denied\n");
         for(i=0,this=line,eye=now->s->i_v;i<81;i++,eye++){
-            *eye=(b16)strtoul(this,&nxt,16);
+            *eye=(unsigned short)strtoul(this,&nxt,16);
             if((this+5!=nxt)&&(i!=0||(this+4!=nxt))) return burn(now);
-            this=nxt; 
+            this=nxt;
         }
-        now->s->left=(b8)strtoul(this,&nxt,16);
+        now->s->left=(unsigned char)strtoul(this,&nxt,16);
         if(this+3!=nxt) return burn(now);
         this=nxt;
-        now->p=(b8)strtoul(this,&nxt,16);
+        now->p=(unsigned char)strtoul(this,&nxt,16);
         if(this+3!=nxt) return burn(now);
         this=nxt;
-        now->v=(b8)strtoul(this,&nxt,16);
+        now->v=(unsigned char)strtoul(this,&nxt,16);
         if(this+3!=nxt) return burn(now);
         line=strtok(0,"\r\n");
         d.top++;
@@ -161,7 +159,7 @@ iint *cnt;
 iint *new (unsigned bound) {
     long szl;
     iint *egg;
-    if(!(egg=malloc(sizeof(iint)))) die("RAM denied\n"); 
+    if(!(egg=malloc(sizeof(iint)))) die("RAM denied\n");
     szl=sizeof(long);
     egg->n=bound/szl+((bound%szl)&&1);
     if(!(egg->i=malloc(egg->n*szl))) die("RAM denied\n");
@@ -170,7 +168,7 @@ iint *new (unsigned bound) {
 }
 
 
-    
+
 int add(iint *eye, unsigned long x) {
     int ret=0;
     *(eye->i)+=x;
@@ -179,7 +177,7 @@ int add(iint *eye, unsigned long x) {
         eye->i++;
             ret=add(eye, 1L);
             eye->i--;
-    } else ret=1; 
+    } else ret=1;
         (eye->n)++;
     }
     return ret;
@@ -189,23 +187,23 @@ int vyu(char *eye, iint *num) {
     static char zp_lu[7];
     unsigned i;
     i=num->n;
-    sprintf(zp_lu, "%%0%lulx", 2*sizeof(unsigned long)); 
-    while(i--) eye+=sprintf(eye, zp_lu, cnt->i[i]); // woah!
+    sprintf(zp_lu, "%%0%lulx", 2*sizeof(unsigned long));
+    while(i--) eye+=sprintf(eye, zp_lu, cnt->i[i]); /* woah! */
     strcat(eye,"\n");
     return 0;
 }
 
-b8 def[10]="123456789";
-b8 out[83]="";
+char def[10]="123456789";
+char out[83]="";
 
-int first(s00d *puzl, b8 *p) {
-    b16 * sun;
+int first(sudoku *puzl, unsigned char *p) {
+    unsigned short * sun;
     for(sun=(&puzl->i_v[0]), *p=0; *p<81; (*p)++, sun++) if(((*sun)&wait)) return 1;
     return 0;
 }
-void S00D(b8 *in, s00d *puzl) {
-    b16 *eye, idea_v;
-    b8 i;
+void sudoku_init(char *in, sudoku *puzl) {
+    unsigned short *eye, idea_v;
+    unsigned char i;
     puzl->left = 81;
     eye = puzl->i_v;
     for(i=0; i<81 && *in; i++, eye++, in++) {
@@ -214,48 +212,48 @@ void S00D(b8 *in, s00d *puzl) {
     }
     for(;i<81;i++,eye++) *eye = 0x7fe7;
 }
-void STR(b8 *buf, s00d *puzl) {
-    b16 *sun;
-    b8 *eye;
-    b8 i;
+void sudoku_to_string(char *buf, sudoku *puzl) {
+    unsigned short *sun;
+    char *eye;
+    unsigned char i;
     eye=buf;
     for (sun=puzl->i_v, i=0; i<81; i++, sun++, eye++) {
         if ((*sun) & open) *eye = '?';
-        else *eye = (b8)('1' + ((*sun) & data));
+        else *eye = (unsigned char)('1' + ((*sun) & data));
     }
     *eye = '\n';
     *(++eye) = '\0';
 }
-int idea(s00d *puzl, b8 *p, b8 *v) {
-    b16 *sun;
+int idea(sudoku *puzl, unsigned char *p, unsigned char *v) {
+    unsigned short *sun;
     for (sun=puzl->i_v, *p=0; *p<81; (*p)++, sun++) {
         if ((*sun)&open) {
-            *v=(b8)((*sun)&data);
+            *v=(unsigned char)((*sun)&data);
             return 1;
         }
     }
     return 0;
 }
-int rm(b16 *eye, b8 v) {
+int rm(unsigned short *eye, unsigned char v) {
     if ((*eye)&may_b[v]) {
         if (!((*eye)&wait)) return 1;
         (*eye)&=~may_b[v];
         (*eye)--;
         if((*eye)&open) {
             for(v=0; v<9; v++) if((*eye)&may_b[v]) break;
-            (*eye) = ((b16)v)|open|may_b[v];
+            (*eye) = ((unsigned short)v)|open|may_b[v];
         }
     }
     return 0;
 }
-int trial(b16 *cell, b8 *v) {
+int trial(unsigned short *cell, unsigned char *v) {
     for(; *v<9; (*v)++) if((*cell)&may_b[*v]) return 1;
     return 0;
 }
-int hook(s00d *puzl) {
-    b8 x;
-    b8 *eye; 
-    b8 pos, val;
+int hook(sudoku *puzl) {
+    unsigned char x;
+    unsigned char *eye;
+    unsigned char pos, val;
     if(d.stack) {
         if(d.top) return 0;
         free(d.stack);
@@ -264,14 +262,14 @@ int hook(s00d *puzl) {
         return 1;
     }
     while(idea(puzl, &pos, &val)) {
-        for(x=0, eye=&clr[pos*20]; x<20; x++, eye++) {       
+        for(x=0, eye=&clr[pos*20]; x<20; x++, eye++) {
              if(rm(&(puzl->i_v[*eye]), val)) return -1;
         }
         puzl->i_v[pos]&=(~open);
         if (!(--(puzl->left))) {
-            STR(out,puzl);
+            sudoku_to_string(out,puzl);
             fputs(out ,stdout);
-            add(cnt,1L); //cant possibly overflow, should i check?
+            add(cnt,1L); /* cant possibly overflow, should i check? */
             if(d.buf){
                 d.pos=0;
                 return 2;
@@ -280,19 +278,19 @@ int hook(s00d *puzl) {
     }
     return 0;
 }
-int crook(s00d *master) {
-    s00d *copy;
-    b16 *mc, *cc;
-    b8 pos, val=0, dummy;
+int crook(sudoku *master) {
+    sudoku *copy;
+    unsigned short *mc, *cc;
+    unsigned char pos, val=0, dummy;
     if(d.stack){
         if(!d.top--) die("stack underflow");
         copy=(d.stack+d.top)->s;
-        pos=(b8)(d.stack+d.top)->p;
-        val=(b8)(d.stack+d.top)->v;
+        pos=(unsigned char)(d.stack+d.top)->p;
+        val=(unsigned char)(d.stack+d.top)->v;
         mc=&master->i_v[pos];
         cc=&copy->i_v[pos];
     } else {
-        if(!(copy=(s00d *)malloc(sizeof(s00d)))) die("RAM denied\n");
+        if(!(copy=(sudoku *)malloc(sizeof(sudoku)))) die("RAM denied\n");
         if(first(master, &pos)) {
             mc=&master->i_v[pos];
             cc=&copy->i_v[pos];
@@ -301,7 +299,7 @@ int crook(s00d *master) {
     while(d.stack||trial(mc, &val)) {
         if(!d.stack){
             *copy=*master;
-            *cc=(((b16)val)|open|may_b[val]);
+            *cc=(((unsigned short)val)|open|may_b[val]);
         }
         switch(squash(copy)){
             case 1:
@@ -322,7 +320,7 @@ int crook(s00d *master) {
     free(copy);
     return 1;
 }
-int squash(s00d *puzl){
+int squash(sudoku *puzl){
     int ret;
     do if(ret=hook(puzl)) return ret; while (!(ret=crook(puzl)));
     return ret;
@@ -332,7 +330,7 @@ int squash(s00d *puzl){
 
 
 int main(int argc, char **argv){
-    s00d *master;
+    sudoku *master;
     char *in;
     FILE *dump;
 
@@ -352,15 +350,15 @@ int main(int argc, char **argv){
     }
 
     if(!d.stack) {
-        if(!(master=(s00d *)malloc(sizeof(s00d)))) die("RAM denied\n");
-        S00D(in, master);
+        if(!(master=(sudoku *)malloc(sizeof(sudoku)))) die("RAM denied\n");
+        sudoku_init(in, master);
     }
 
     if(signal(SIGINT, rq)==SIG_ERR) fputs("could not enable dump feature\n", stderr);
     else fputs("dump feature enabled\n", stderr);
 
     cnt=new(10);
-        
+
     switch(squash(master)) {
         case -1:
         fputs("no solution\n",stderr);
@@ -368,14 +366,14 @@ int main(int argc, char **argv){
         case 2:
         dmp(master,10,10);
         if(!(dump=fopen("dump","wb"))) die("couldn't create dumpfile\n");
-        //rather dump to stderr
+        /* rather dump to stderr */
         fputs(d.buf, dump);
         fclose(dump);
         free(d.buf);
     }
     free(master);
 
-    *out='#'; vyu(out+1, cnt); // haha! passing a global :D
+    *out='#'; vyu(out+1, cnt); /* haha! passing a global :D */
     fputs(out, stderr);
 
     return 0;
