@@ -43,30 +43,30 @@ unsigned short data=0xf;
 
 #include <string.h>
 
-int scope_gen(unsigned char clr[81*20]){
+int scope_gen(unsigned char scope[81*20]){
    unsigned char i, j,
       r, c, gr, gc;
    unsigned char *eye;
-   unsigned char scope[81];
+   unsigned char scope_seive[81];
    /* malloc from stdlib.h */
-   for (i=0, eye=clr;i<81;i++) {
-      memset(scope, 0, 81*sizeof(unsigned char));
+   for (i=0, eye=scope;i<81;i++) {
+      memset(scope_seive, 0, 81*sizeof(unsigned char));
       /* from string.h */
       r=i/(9);
       c=i%(9);
       gr=(r/3)*3;
       gc=(c/3)*3;
       for (j=0; j<9; j++) {
-         scope[r*9+j]++;
-         scope[j*9+c]++;
-         scope[(gr+j/3)*9+gc+j%3]++;
+         scope_seive[r*9+j]++;
+         scope_seive[j*9+c]++;
+         scope_seive[(gr+j/3)*9+gc+j%3]++;
       }
-      scope[i]=0;
-      for(j=0; j<81; j++) if (scope[j]) {*eye = j; eye++;}
+      scope_seive[i]=0;
+      for(j=0; j<81; j++) if (scope_seive[j]) {*eye = j; eye++;}
    }
    return 0;
 }
-unsigned char clr[81*20];
+unsigned char scope[81*20];
 typedef struct {
     sudoku *s;
     int p;
@@ -262,7 +262,7 @@ int hook(sudoku *puzl) {
         return 1;
     }
     while(idea(puzl, &pos, &val)) {
-        for(x=0, eye=&clr[pos*20]; x<20; x++, eye++) {
+        for(x=0, eye=&scope[pos*20]; x<20; x++, eye++) {
              if(rm(&(puzl->i_v[*eye]), val)) return -1;
         }
         puzl->i_v[pos]&=(~open);
@@ -338,7 +338,7 @@ int main(int argc, char **argv){
     d.stack=0;
     d.pos=d.top=-1;
 
-    scope_gen(clr);
+    scope_gen(scope);
 
     if(argc>1) {
         in=argv[1];
