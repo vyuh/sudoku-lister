@@ -195,13 +195,13 @@ iint *new (unsigned bound) {
 
 
 
-int add (iint * eye, unsigned long x) {
+int iint_add (iint * eye, unsigned long x) {
   int ret = 0;
   *(eye->i) += x;
   if (*(eye->i) < x) {
     if (--(eye->n)) {
       eye->i++;
-      ret = add (eye, 1L);
+      ret = iint_add (eye, 1L);
       eye->i--;
     }
     else
@@ -312,7 +312,7 @@ int hook (sudoku * puzl) {
     if (!(--(puzl->left))) {
       sudoku_to_string (out, puzl);
       fputs (out, stdout);
-      add (cnt, 1L);            /* cant possibly overflow, should i check? */
+      iint_add (cnt, 1L);            /* cant possibly overflow, should i check? */
       if (d.buffer) {
         d.position = 0;
         return 2;
