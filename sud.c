@@ -341,18 +341,17 @@ int main(int argc, char **argv){
 
     scope_gen(scope);
 
-    if(argc>1) {
-        in=argv[1];
-    } else {
-        if(dumpfile_try_read()) in=def; else {
-            d.top--;
-            master=(d.stack+d.top)->s;
-        }
-    }
+    in = argc > 1 ? argv[1] : def;
 
-    if(!d.stack) {
+    if(argc > 1 || dumpfile_try_read()) {
+        /* we have not read a dumpfile */
         if(!(master=(sudoku *)malloc(sizeof(sudoku)))) die("RAM denied\n");
         sudoku_init(in, master);
+    } else {
+        /* we have read dumpfile */
+        d.top--;
+        master=(d.stack+d.top)->s;
+        /* pop a sudoku_state */
     }
 
     if(signal(SIGINT, rq)==SIG_ERR) fputs("could not enable dump feature\n", stderr);
