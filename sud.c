@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014, Prashant Karmakar, webster15july@gmail.com
+Copyright (c) 2016, Prashant Karmakar, webster15july@gmail.com
 
  Permission to use, copy, modify, and/or distribute this software for
  any purpose with or without fee is hereby granted, provided that
@@ -439,5 +439,3 @@ int main (int argc, char **argv) {
 
   return 0;
 }
-
-/* pk 20131110 2110 */
