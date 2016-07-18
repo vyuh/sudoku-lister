@@ -106,18 +106,18 @@ int burn(sudoku_state *n){
     d.buffer=0;
     return 1;
 }
-int rd(){
-    FILE *dump;
+int dumpfile_try_read(){
+    FILE *dumpfile;
     int depth, i;
     char *line, *this, *nxt;
     unsigned short *eye;
     sudoku_state *now;
 
-    if(!(dump=fopen("dump", "rb"))) return 2;
+    if(!(dumpfile=fopen("dump", "rb"))) return 2;
     if(!(d.buffer=(char *)malloc(81*414))) die("RAM denied\n");
     memset(d.buffer, 0, 81*414);
-    depth=fread(d.buffer, 414, 81, dump); /* if CRLF & fread doesnt copy the last incomplete line */
-    fclose(dump);
+    depth=fread(d.buffer, 414, 81, dumpfile); /* if CRLF & fread doesnt copy the last incomplete line */
+    fclose(dumpfile);
     if(!depth) return 1;
 
     if(!(d.stack=(sudoku_state *)malloc(sizeof(sudoku_state)*depth))) die("RAM denied\n");
@@ -333,7 +333,7 @@ int squash(sudoku *puzl){
 int main(int argc, char **argv){
     sudoku *master;
     char *in;
-    FILE *dump;
+    FILE *dumpfile;
 
     d.buffer=0;
     d.stack=0;
@@ -344,7 +344,7 @@ int main(int argc, char **argv){
     if(argc>1) {
         in=argv[1];
     } else {
-        if(rd()) in=def; else {
+        if(dumpfile_try_read()) in=def; else {
             d.top--;
             master=(d.stack+d.top)->s;
         }
@@ -366,10 +366,10 @@ int main(int argc, char **argv){
         break;
         case 2:
         dmp(master,10,10);
-        if(!(dump=fopen("dump","wb"))) die("couldn't create dumpfile\n");
+        if(!(dumpfile=fopen("dump","wb"))) die("couldn't create dumpfile\n");
         /* rather dump to stderr */
-        fputs(d.buffer, dump);
-        fclose(dump);
+        fputs(d.buffer, dumpfile);
+        fclose(dumpfile);
         free(d.buffer);
     }
     free(master);
