@@ -270,7 +270,7 @@ int idea (sudoku * puzl, unsigned char *p, unsigned char *v) {
   }
   return 0;
 }
-int rm (unsigned short *eye, unsigned char v) {
+int remove_probable (unsigned short *eye, unsigned char v) {
   if ((*eye) & may_b[v]) {
     if (!((*eye) & wait))
       return 1;
@@ -305,7 +305,7 @@ int hook (sudoku * puzl) {
   }
   while (idea (puzl, &pos, &val)) {
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
-      if (rm (&(puzl->i_v[*eye]), val))
+      if (remove_probable (&(puzl->i_v[*eye]), val))
         return -1;
     }
     puzl->i_v[pos] &= (~open);
@@ -359,7 +359,7 @@ int crook (sudoku * master) {
       d.position += sudoku_dump (copy, (int) pos, (int) val);
       return 2;
     case -1:
-      rm (mc, val);             /* should i check? */
+      remove_probable (mc, val);             /* should i check? */
       ;
       if (idea (master, &pos, &dummy) && (dummy > val)) {
         free (copy);
