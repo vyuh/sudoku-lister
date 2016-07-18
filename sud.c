@@ -260,7 +260,7 @@ void sudoku_to_string (char *buffer, sudoku * puzl) {
   *eye = '\n';
   *(++eye) = '\0';
 }
-int idea (sudoku * puzl, unsigned char *p, unsigned char *v) {
+int sudoku_cell_to_fill (sudoku * puzl, unsigned char *p, unsigned char *v) {
   unsigned short *sun;
   for (sun = puzl->i_v, *p = 0; *p < 81; (*p)++, sun++) {
     if ((*sun) & open) {
@@ -285,7 +285,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
   }
   return 0;
 }
-int trial (unsigned short *cell, unsigned char *v) {
+int cell_value_to_try (unsigned short *cell, unsigned char *v) {
   for (; *v < 9; (*v)++)
     if ((*cell) & may_b[*v])
       return 1;
@@ -303,7 +303,7 @@ int hook (sudoku * puzl) {
     d.top = -1;
     return 1;
   }
-  while (idea (puzl, &pos, &val)) {
+  while (sudoku_cell_to_fill (puzl, &pos, &val)) {
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
       if (remove_probable (&(puzl->i_v[*eye]), val))
         return -1;
@@ -346,7 +346,7 @@ int crook (sudoku * master) {
     else
       return 1;
   }
-  while (d.stack || trial (mc, &val)) {
+  while (d.stack || cell_value_to_try (mc, &val)) {
     if (!d.stack) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
@@ -361,7 +361,7 @@ int crook (sudoku * master) {
     case -1:
       remove_probable (mc, val);             /* should i check? */
       ;
-      if (idea (master, &pos, &dummy) && (dummy > val)) {
+      if (sudoku_cell_to_fill (master, &pos, &dummy) && (dummy > val)) {
         free (copy);
         return 0;
       }
