@@ -225,7 +225,7 @@ int iint_to_string (char *eye, iint * num) {
 char def[10] = "123456789";
 char out[83] = "";
 
-int first (sudoku * puzl, unsigned char *p) {
+int sudoku_first_waiting_cell (sudoku * puzl, unsigned char *p) {
   unsigned short *sun;
   for (sun = (&puzl->i_v[0]), *p = 0; *p < 81; (*p)++, sun++)
     if (((*sun) & wait))
@@ -339,7 +339,7 @@ int crook (sudoku * master) {
   else {
     if (!(copy = (sudoku *) malloc (sizeof (sudoku))))
       die ("RAM denied\n");
-    if (first (master, &pos)) {
+    if (sudoku_first_waiting_cell (master, &pos)) {
       mc = &master->i_v[pos];
       cc = &copy->i_v[pos];
     }
