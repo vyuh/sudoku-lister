@@ -365,10 +365,13 @@ int main(int argc, char **argv){
         break;
         case 2:
         dmp(master,10,10);
-        if(!(dumpfile=fopen("dump","wb"))) die("couldn't create dumpfile\n");
-        /* rather dump to stderr */
-        fputs(d.buffer, dumpfile);
-        fclose(dumpfile);
+        if(!(dumpfile=fopen("dump","wb"))) {
+            fputs("couldn't create dumpfile\n", stderr);
+            fputs(d.buffer, stderr);
+        } else {
+            fputs(d.buffer, dumpfile);
+            fclose(dumpfile);
+        }
         free(d.buffer);
     }
     free(master);
