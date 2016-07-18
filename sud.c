@@ -71,10 +71,10 @@ typedef struct {
     sudoku *s;
     int p;
     int v;
-} state;
+} sudoku_state;
 struct {
     char *buf;
-    state *stack;
+    sudoku_state *stack;
     int top;
     int pos;
 } d;
@@ -97,7 +97,7 @@ int dmp(sudoku *s, int p, int v){
 
     return l; /* the characters written d.pos to be incremented outside */
 }
-int burn(state *n){
+int burn(sudoku_state *n){
     for(;n>=d.stack;n--) free(n->s);
     free(d.stack);
     d.stack=0;
@@ -110,7 +110,7 @@ int rd(){
     int depth, i;
     char *line, *this, *nxt;
     unsigned short *eye;
-    state *now;
+    sudoku_state *now;
 
     if(!(dump=fopen("dump", "rb"))) return 2;
     if(!(d.buf=(char *)malloc(81*414))) die("RAM denied\n");
@@ -119,8 +119,8 @@ int rd(){
     fclose(dump);
     if(!depth) return 1;
 
-    if(!(d.stack=(state *)malloc(sizeof(state)*depth))) die("RAM denied\n");
-    memset(d.stack, 0, sizeof(state)*depth);
+    if(!(d.stack=(sudoku_state *)malloc(sizeof(sudoku_state)*depth))) die("RAM denied\n");
+    memset(d.stack, 0, sizeof(sudoku_state)*depth);
 
     line=strtok(d.buf,"\r\n");
     d.top=0;
