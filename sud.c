@@ -91,7 +91,7 @@ void rq (int sig) {
     die ("RAM denied");
   memset (d.buffer, 0, 81 * 414);
 }
-int dmp (sudoku * s, int p, int v) {
+int sudoku_dump (sudoku * s, int p, int v) {
   char *eye;
   unsigned short *sun;
   int l;
@@ -356,7 +356,7 @@ int crook (sudoku * master) {
       val++;
       break;
     case 2:
-      d.position += dmp (copy, (int) pos, (int) val);
+      d.position += sudoku_dump (copy, (int) pos, (int) val);
       return 2;
     case -1:
       rm (mc, val);		/* should i check? */
@@ -420,7 +420,7 @@ int main (int argc, char **argv) {
     fputs ("no solution\n", stderr);
     break;
   case 2:
-    dmp (master, 10, 10);
+    sudoku_dump (master, 10, 10);
     if (!(dumpfile = fopen ("dump", "wb"))) {
       fputs ("couldn't create dumpfile\n", stderr);
       fputs (d.buffer, stderr);
