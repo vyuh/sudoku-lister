@@ -217,7 +217,7 @@ int iint_to_string (char *eye, iint * num) {
   i = num->n;
   sprintf (zp_lu, "%%0%lulx", 2 * sizeof (unsigned long));
   while (i--)
-    eye += sprintf (eye, zp_lu, count->i[i]);     /* woah! */
+    eye += sprintf (eye, zp_lu, num->i[i]);     /* woah! */
   strcat (eye, "\n");
   return 0;
 }
