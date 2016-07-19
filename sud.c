@@ -85,7 +85,7 @@ struct {
   int top;
 } d;
 #include <signal.h>
-void rq (int sig) {
+void dump_request (int sig) {
   fputs ("\ndump requested\n", stderr);
   if (!(d.buffer = malloc (81 * 414)))
     die ("RAM denied");
@@ -178,9 +178,9 @@ typedef struct {
   unsigned int n;
 } iint;
 
-iint *cnt;
+iint *count;
 
-iint *new (unsigned bound) {
+iint *iint_new (unsigned bound) {
   long szl;
   iint *egg;
   if (!(egg = malloc (sizeof (iint))))
@@ -217,7 +217,7 @@ int iint_to_string (char *eye, iint * num) {
   i = num->n;
   sprintf (zp_lu, "%%0%lulx", 2 * sizeof (unsigned long));
   while (i--)
-    eye += sprintf (eye, zp_lu, cnt->i[i]);     /* woah! */
+    eye += sprintf (eye, zp_lu, count->i[i]);     /* woah! */
   strcat (eye, "\n");
   return 0;
 }
@@ -312,7 +312,7 @@ int hook (sudoku * puzl) {
     if (!(--(puzl->left))) {
       sudoku_to_string (out, puzl);
       fputs (out, stdout);
-      iint_add (cnt, 1L);            /* cant possibly overflow, should i check? */
+      iint_add (count, 1L);            /* cant possibly overflow, should i check? */
       if (d.buffer) {
         d.position = 0;
         return 2;
@@ -408,12 +408,12 @@ int main (int argc, char **argv) {
     /* pop a sudoku_state */
   }
 
-  if (signal (SIGINT, rq) == SIG_ERR)
+  if (signal (SIGINT, dump_request) == SIG_ERR)
     fputs ("could not enable dump feature\n", stderr);
   else
     fputs ("dump feature enabled\n", stderr);
 
-  cnt = new (10);
+  count = iint_new (10);
 
   switch (squash (master)) {
   case -1:
@@ -434,7 +434,7 @@ int main (int argc, char **argv) {
   free (master);
 
   *out = '#';
-  iint_to_string (out + 1, cnt);        /* haha! passing a global :D */
+  iint_to_string (out + 1, count);        /* haha! passing a global :D */
   fputs (out, stderr);
 
   return 0;
