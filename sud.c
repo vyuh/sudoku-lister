@@ -83,20 +83,20 @@ struct {
 
   sudoku_state *stack;
   int top;
-} d;
+} dump_data;
 #include <signal.h>
 void dump_request (int sig) {
   fputs ("\ndump requested\n", stderr);
-  if (!(d.buffer = malloc (81 * 414)))
+  if (!(dump_data.buffer = malloc (81 * 414)))
     die ("RAM denied");
-  memset (d.buffer, 0, 81 * 414);
+  memset (dump_data.buffer, 0, 81 * 414);
 }
 int sudoku_dump (sudoku * s, int p, int v) {
   char *eye;
   unsigned short *sun;
   int l;
 
-  for (l = 0, eye = d.buffer + d.position, sun = s->i_v; l < 405;
+  for (l = 0, eye = dump_data.buffer + dump_data.position, sun = s->i_v; l < 405;
        sun++, eye += 5)
     l += sprintf (eye, "%04x ", (int) *sun);
 
@@ -106,16 +106,16 @@ int sudoku_dump (sudoku * s, int p, int v) {
   eye += 3;
   l += sprintf (eye, "%02x\n", v);
 
-  return l;                     /* the characters written d.position to be
+  return l;                     /* the characters written dump_data.position to be
                                    incremented outside */
 }
 int burn (sudoku_state * n) {
-  for (; n >= d.stack; n--)
+  for (; n >= dump_data.stack; n--)
     free (n->s);
-  free (d.stack);
-  d.stack = 0;
-  free (d.buffer);
-  d.buffer = 0;
+  free (dump_data.stack);
+  dump_data.stack = 0;
+  free (dump_data.buffer);
+  dump_data.buffer = 0;
   return 1;
 }
 int dumpfile_try_read () {
@@ -127,24 +127,24 @@ int dumpfile_try_read () {
 
   if (!(dumpfile = fopen ("dump", "rb")))
     return 2;
-  if (!(d.buffer = (char *) malloc (81 * 414)))
+  if (!(dump_data.buffer = (char *) malloc (81 * 414)))
     die ("RAM denied\n");
-  memset (d.buffer, 0, 81 * 414);
-  depth = fread (d.buffer, 414, 81, dumpfile);  /* if CRLF & fread doesnt
+  memset (dump_data.buffer, 0, 81 * 414);
+  depth = fread (dump_data.buffer, 414, 81, dumpfile);  /* if CRLF & fread doesnt
                                                    copy the last incomplete
                                                    line */
   fclose (dumpfile);
   if (!depth)
     return 1;
 
-  if (!(d.stack = (sudoku_state *) malloc (sizeof (sudoku_state) * depth)))
+  if (!(dump_data.stack = (sudoku_state *) malloc (sizeof (sudoku_state) * depth)))
     die ("RAM denied\n");
-  memset (d.stack, 0, sizeof (sudoku_state) * depth);
+  memset (dump_data.stack, 0, sizeof (sudoku_state) * depth);
 
-  line = strtok (d.buffer, "\r\n");
-  d.top = 0;
+  line = strtok (dump_data.buffer, "\r\n");
+  dump_data.top = 0;
   while (line && depth) {
-    now = d.stack + d.top;
+    now = dump_data.stack + dump_data.top;
     if (!(now->s = (sudoku *) malloc (sizeof (sudoku))))
       die ("RAM denied\n");
     for (i = 0, this = line, eye = now->s->i_v; i < 81; i++, eye++) {
@@ -165,11 +165,11 @@ int dumpfile_try_read () {
     if (this + 3 != nxt)
       return burn (now);
     line = strtok (0, "\r\n");
-    d.top++;
+    dump_data.top++;
     depth--;
   }
-  free (d.buffer);
-  d.buffer = 0;
+  free (dump_data.buffer);
+  dump_data.buffer = 0;
   return 0;
 }
 
@@ -295,12 +295,12 @@ int hook (sudoku * puzl) {
   unsigned char x;
   unsigned char *eye;
   unsigned char pos, val;
-  if (d.stack) {
-    if (d.top)
+  if (dump_data.stack) {
+    if (dump_data.top)
       return 0;
-    free (d.stack);
-    d.stack = 0;
-    d.top = -1;
+    free (dump_data.stack);
+    dump_data.stack = 0;
+    dump_data.top = -1;
     return 1;
   }
   while (sudoku_cell_to_fill (puzl, &pos, &val)) {
@@ -313,8 +313,8 @@ int hook (sudoku * puzl) {
       sudoku_to_string (out, puzl);
       fputs (out, stdout);
       iint_add (count, 1L);            /* cant possibly overflow, should i check? */
-      if (d.buffer) {
-        d.position = 0;
+      if (dump_data.buffer) {
+        dump_data.position = 0;
         return 2;
       }
       else
@@ -327,12 +327,12 @@ int crook (sudoku * master) {
   sudoku *copy;
   unsigned short *mc, *cc;
   unsigned char pos, val = 0, dummy;
-  if (d.stack) {
-    if (!d.top--)
+  if (dump_data.stack) {
+    if (!dump_data.top--)
       die ("stack underflow");
-    copy = (d.stack + d.top)->s;
-    pos = (unsigned char) (d.stack + d.top)->p;
-    val = (unsigned char) (d.stack + d.top)->v;
+    copy = (dump_data.stack + dump_data.top)->s;
+    pos = (unsigned char) (dump_data.stack + dump_data.top)->p;
+    val = (unsigned char) (dump_data.stack + dump_data.top)->v;
     mc = &master->i_v[pos];
     cc = &copy->i_v[pos];
   }
@@ -346,8 +346,8 @@ int crook (sudoku * master) {
     else
       return 1;
   }
-  while (d.stack || cell_value_to_try (mc, &val)) {
-    if (!d.stack) {
+  while (dump_data.stack || cell_value_to_try (mc, &val)) {
+    if (!dump_data.stack) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
     }
@@ -356,7 +356,7 @@ int crook (sudoku * master) {
       val++;
       break;
     case 2:
-      d.position += sudoku_dump (copy, (int) pos, (int) val);
+      dump_data.position += sudoku_dump (copy, (int) pos, (int) val);
       return 2;
     case -1:
       remove_probable (mc, val);             /* should i check? */
@@ -387,9 +387,9 @@ int main (int argc, char **argv) {
   char *in;
   FILE *dumpfile;
 
-  d.buffer = 0;
-  d.stack = 0;
-  d.position = d.top = -1;
+  dump_data.buffer = 0;
+  dump_data.stack = 0;
+  dump_data.position = dump_data.top = -1;
 
   scope_gen (scope);
 
@@ -403,8 +403,8 @@ int main (int argc, char **argv) {
   }
   else {
     /* we have read dumpfile */
-    d.top--;
-    master = (d.stack + d.top)->s;
+    dump_data.top--;
+    master = (dump_data.stack + dump_data.top)->s;
     /* pop a sudoku_state */
   }
 
@@ -423,13 +423,13 @@ int main (int argc, char **argv) {
     sudoku_dump (master, 10, 10);
     if (!(dumpfile = fopen ("dump", "wb"))) {
       fputs ("couldn't create dumpfile\n", stderr);
-      fputs (d.buffer, stderr);
+      fputs (dump_data.buffer, stderr);
     }
     else {
-      fputs (d.buffer, dumpfile);
+      fputs (dump_data.buffer, dumpfile);
       fclose (dumpfile);
     }
-    free (d.buffer);
+    free (dump_data.buffer);
   }
   free (master);
 
