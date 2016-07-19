@@ -227,18 +227,18 @@ int iint_to_string (char *eye, iint * num) {
 char def[10] = "123456789";
 char out[83] = "";
 
-int sudoku_first_waiting_cell (sudoku * puzl, unsigned char *p) {
+int sudoku_first_waiting_cell (sudoku * puzzle, unsigned char *p) {
   unsigned short *sun;
-  for (sun = (&puzl->i_v[0]), *p = 0; *p < 81; (*p)++, sun++)
+  for (sun = (&puzzle->i_v[0]), *p = 0; *p < 81; (*p)++, sun++)
     if (((*sun) & wait))
       return 1;
   return 0;
 }
-void sudoku_init (char *in, sudoku * puzl) {
+void sudoku_init (char *in, sudoku * puzzle) {
   unsigned short *eye, idea_v;
   unsigned char i;
-  puzl->left = 81;
-  eye = puzl->i_v;
+  puzzle->left = 81;
+  eye = puzzle->i_v;
   for (i = 0; i < 81 && *in; i++, eye++, in++) {
     if ((idea_v = (*in) - '1') < 9)
       *eye = idea_v | open | may_b[idea_v];
@@ -248,12 +248,12 @@ void sudoku_init (char *in, sudoku * puzl) {
   for (; i < 81; i++, eye++)
     *eye = 0x7fe7;
 }
-void sudoku_to_string (char *buffer, sudoku * puzl) {
+void sudoku_to_string (char *buffer, sudoku * puzzle) {
   unsigned short *sun;
   char *eye;
   unsigned char i;
   eye = buffer;
-  for (sun = puzl->i_v, i = 0; i < 81; i++, sun++, eye++) {
+  for (sun = puzzle->i_v, i = 0; i < 81; i++, sun++, eye++) {
     if ((*sun) & open)
       *eye = '?';
     else
@@ -262,9 +262,9 @@ void sudoku_to_string (char *buffer, sudoku * puzl) {
   *eye = '\n';
   *(++eye) = '\0';
 }
-int sudoku_cell_to_fill (sudoku * puzl, unsigned char *p, unsigned char *v) {
+int sudoku_cell_to_fill (sudoku * puzzle, unsigned char *p, unsigned char *v) {
   unsigned short *sun;
-  for (sun = puzl->i_v, *p = 0; *p < 81; (*p)++, sun++) {
+  for (sun = puzzle->i_v, *p = 0; *p < 81; (*p)++, sun++) {
     if ((*sun) & open) {
       *v = (unsigned char) ((*sun) & data);
       return 1;
@@ -293,7 +293,7 @@ int cell_value_to_try (unsigned short *cell, unsigned char *v) {
       return 1;
   return 0;
 }
-int hook (sudoku * puzl, dump_struct * dump_structure) {
+int hook (sudoku * puzzle, dump_struct * dump_structure) {
   unsigned char x;
   unsigned char *eye;
   unsigned char pos, val;
@@ -305,14 +305,14 @@ int hook (sudoku * puzl, dump_struct * dump_structure) {
     dump_structure->top = -1;
     return 1;
   }
-  while (sudoku_cell_to_fill (puzl, &pos, &val)) {
+  while (sudoku_cell_to_fill (puzzle, &pos, &val)) {
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
-      if (remove_probable (&(puzl->i_v[*eye]), val))
+      if (remove_probable (&(puzzle->i_v[*eye]), val))
         return -1;
     }
-    puzl->i_v[pos] &= (~open);
-    if (!(--(puzl->left))) {
-      sudoku_to_string (out, puzl);
+    puzzle->i_v[pos] &= (~open);
+    if (!(--(puzzle->left))) {
+      sudoku_to_string (out, puzzle);
       fputs (out, stdout);
       iint_add (count, 1L);            /* cant possibly overflow, should i check? */
       if (dump_structure->buffer) {
@@ -372,16 +372,16 @@ int crook (sudoku * master, dump_struct * dump_structure) {
   free (copy);
   return 1;
 }
-int squash (sudoku * puzl, dump_struct * dump_structure) {
+int squash (sudoku * puzzle, dump_struct * dump_structure) {
   /* TODO the log_struct * log_structure
    * then probably env_struct * environment
    * which encapsulates log, dump, count and more
    */
   int ret;
   do
-    if (ret = hook (puzl, dump_structure))
+    if (ret = hook (puzzle, dump_structure))
       return ret;
-  while (!(ret = crook (puzl, dump_structure)));
+  while (!(ret = crook (puzzle, dump_structure)));
   return ret;
 }
 
