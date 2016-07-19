@@ -110,13 +110,14 @@ int sudoku_dump (sudoku * s, int p, int v, char * buffer) {
   return l;                     /* the characters written dump_data.position to be
                                    incremented outside */
 }
-int burn (sudoku_state * n) {
-  for (; n >= dump_data.stack; n--)
+int dump_struct_free (dump_struct * dump_structure) {
+  sudoku_state * n;
+  for (; n >= dump_structure->stack + dump_structure->top; n--)
     free (n->s);
-  free (dump_data.stack);
-  dump_data.stack = 0;
-  free (dump_data.buffer);
-  dump_data.buffer = 0;
+  free (dump_structure->stack);
+  dump_structure->stack = 0;
+  free (dump_structure->buffer);
+  dump_structure->buffer = 0;
   return 1;
 }
 int dumpfile_try_read () {
@@ -151,20 +152,20 @@ int dumpfile_try_read () {
     for (i = 0, this = line, eye = now->s->i_v; i < 81; i++, eye++) {
       *eye = (unsigned short) strtoul (this, &nxt, 16);
       if ((this + 5 != nxt) && (i != 0 || (this + 4 != nxt)))
-        return burn (now);
+        return dump_struct_free (&dump_data);
       this = nxt;
     }
     now->s->left = (unsigned char) strtoul (this, &nxt, 16);
     if (this + 3 != nxt)
-      return burn (now);
+      return dump_struct_free (&dump_data);
     this = nxt;
     now->p = (unsigned char) strtoul (this, &nxt, 16);
     if (this + 3 != nxt)
-      return burn (now);
+      return dump_struct_free (&dump_data);
     this = nxt;
     now->v = (unsigned char) strtoul (this, &nxt, 16);
     if (this + 3 != nxt)
-      return burn (now);
+      return dump_struct_free (&dump_data);
     line = strtok (0, "\r\n");
     dump_data.top++;
     depth--;
