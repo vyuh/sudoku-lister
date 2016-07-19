@@ -77,13 +77,14 @@ typedef struct {
   int p;
   int v;
 } sudoku_state;
-struct {
+typedef struct {
   char *buffer;
   int position;
 
   sudoku_state *stack;
   int top;
-} dump_data;
+} dump_struct;
+dump_struct dump_data;
 #include <signal.h>
 void dump_request (int sig) {
   fputs ("\ndump requested\n", stderr);
