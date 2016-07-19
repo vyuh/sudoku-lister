@@ -91,12 +91,12 @@ void dump_request (int sig) {
     die ("RAM denied");
   memset (dump_data.buffer, 0, 81 * 414);
 }
-int sudoku_dump (sudoku * s, int p, int v) {
+int sudoku_dump (sudoku * s, int p, int v, char * buffer) {
   char *eye;
   unsigned short *sun;
   int l;
 
-  for (l = 0, eye = dump_data.buffer + dump_data.position, sun = s->i_v; l < 405;
+  for (l = 0, eye = buffer, sun = s->i_v; l < 405;
        sun++, eye += 5)
     l += sprintf (eye, "%04x ", (int) *sun);
 
@@ -356,7 +356,7 @@ int crook (sudoku * master) {
       val++;
       break;
     case 2:
-      dump_data.position += sudoku_dump (copy, (int) pos, (int) val);
+      dump_data.position += sudoku_dump (copy, (int) pos, (int) val, dump_data.buffer + dump_data.position);
       return 2;
     case -1:
       remove_probable (mc, val);             /* should i check? */
@@ -420,7 +420,7 @@ int main (int argc, char **argv) {
     fputs ("no solution\n", stderr);
     break;
   case 2:
-    sudoku_dump (master, 10, 10);
+    sudoku_dump (master, 10, 10, dump_data.buffer + dump_data.position);
     if (!(dumpfile = fopen ("dump", "wb"))) {
       fputs ("couldn't create dumpfile\n", stderr);
       fputs (dump_data.buffer, stderr);
