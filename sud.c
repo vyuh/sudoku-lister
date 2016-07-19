@@ -293,16 +293,16 @@ int cell_value_to_try (unsigned short *cell, unsigned char *v) {
       return 1;
   return 0;
 }
-int hook (sudoku * puzl) {
+int hook (sudoku * puzl, dump_struct * dump_structure) {
   unsigned char x;
   unsigned char *eye;
   unsigned char pos, val;
-  if (dump_data.stack) {
-    if (dump_data.top)
+  if (dump_structure->stack) {
+    if (dump_structure->top)
       return 0;
-    free (dump_data.stack);
-    dump_data.stack = 0;
-    dump_data.top = -1;
+    free (dump_structure->stack);
+    dump_structure->stack = 0;
+    dump_structure->top = -1;
     return 1;
   }
   while (sudoku_cell_to_fill (puzl, &pos, &val)) {
@@ -315,8 +315,8 @@ int hook (sudoku * puzl) {
       sudoku_to_string (out, puzl);
       fputs (out, stdout);
       iint_add (count, 1L);            /* cant possibly overflow, should i check? */
-      if (dump_data.buffer) {
-        dump_data.position = 0;
+      if (dump_structure->buffer) {
+        dump_structure->position = 0;
         return 2;
       }
       else
@@ -325,16 +325,16 @@ int hook (sudoku * puzl) {
   }
   return 0;
 }
-int crook (sudoku * master) {
+int crook (sudoku * master, dump_struct * dump_structure) {
   sudoku *copy;
   unsigned short *mc, *cc;
   unsigned char pos, val = 0, dummy;
-  if (dump_data.stack) {
-    if (!dump_data.top--)
+  if (dump_structure->stack) {
+    if (!dump_structure->top--)
       die ("stack underflow");
-    copy = (dump_data.stack + dump_data.top)->s;
-    pos = (unsigned char) (dump_data.stack + dump_data.top)->p;
-    val = (unsigned char) (dump_data.stack + dump_data.top)->v;
+    copy = (dump_structure->stack + dump_structure->top)->s;
+    pos = (unsigned char) (dump_structure->stack + dump_structure->top)->p;
+    val = (unsigned char) (dump_structure->stack + dump_structure->top)->v;
     mc = &master->i_v[pos];
     cc = &copy->i_v[pos];
   }
@@ -348,17 +348,17 @@ int crook (sudoku * master) {
     else
       return 1;
   }
-  while (dump_data.stack || cell_value_to_try (mc, &val)) {
-    if (!dump_data.stack) {
+  while (dump_structure->stack || cell_value_to_try (mc, &val)) {
+    if (!dump_structure->stack) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
     }
-    switch (squash (copy)) {
+    switch (squash (copy, dump_structure)) {
     case 1:
       val++;
       break;
     case 2:
-      dump_data.position += sudoku_dump (copy, (int) pos, (int) val, dump_data.buffer + dump_data.position);
+      dump_structure->position += sudoku_dump (copy, (int) pos, (int) val, dump_structure->buffer + dump_structure->position);
       return 2;
     case -1:
       remove_probable (mc, val);             /* should i check? */
@@ -372,12 +372,16 @@ int crook (sudoku * master) {
   free (copy);
   return 1;
 }
-int squash (sudoku * puzl) {
+int squash (sudoku * puzl, dump_struct * dump_structure) {
+  /* TODO the log_struct * log_structure
+   * then probably env_struct * environment
+   * which encapsulates log, dump, count and more
+   */
   int ret;
   do
-    if (ret = hook (puzl))
+    if (ret = hook (puzl, dump_structure))
       return ret;
-  while (!(ret = crook (puzl)));
+  while (!(ret = crook (puzl, dump_structure)));
   return ret;
 }
 
@@ -417,7 +421,7 @@ int main (int argc, char **argv) {
 
   count = iint_new (10);
 
-  switch (squash (master)) {
+  switch (squash (master, &dump_data)) {
   case -1:
     fputs ("no solution\n", stderr);
     break;
