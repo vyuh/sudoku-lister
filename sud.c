@@ -369,7 +369,6 @@ int crook (sudoku * master, dump_struct * dump_structure) {
       return 2;
     case -1:
       remove_probable (mc, val);        /* should i check? */
-      ;
       if (sudoku_cell_to_fill (master, &pos, &dummy) && (dummy > val)) {
         free (copy);
         return 0;
