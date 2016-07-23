@@ -247,6 +247,7 @@ void sudoku_init (char *in, sudoku * puzzle) {
   for (i = 0; i < 81 && *in; i++, eye++, in++) {
     if ((idea_v = (*in) - '1') < 9)
       *eye = idea_v | open | may_b[idea_v];
+      /* LOG marked_input_idea, pos val*/
     else
       *eye = 0x7fe7;
   }
@@ -283,11 +284,13 @@ int remove_probable (unsigned short *eye, unsigned char v) {
       return 1;
     (*eye) &= ~may_b[v];
     (*eye)--;
+    /* LOG removed_probable */
     if ((*eye) & open) {
       for (v = 0; v < 9; v++)
         if ((*eye) & may_b[v])
           break;
       (*eye) = ((unsigned short) v) | open | may_b[v];
+      /* LOG marked_logical_idea, val */
     }
   }
   return 0;
@@ -311,12 +314,16 @@ int hook (sudoku * puzzle, dump_struct * dump_structure) {
     return 1;
   }
   while (sudoku_cell_to_fill (puzzle, &pos, &val)) {
+    /* LOG checking_idea, pos val */
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
+      /* LOG checking_probable, pos val */
       if (remove_probable (&(puzzle->i_v[*eye]), val))
         return -1;
     }
     puzzle->i_v[pos] &= (~open);
+    /* LOG idea_locked, pos val*/
     if (!(--(puzzle->left))) {
+      /* LOG a_solution_reached */
       sudoku_to_string (out, puzzle);
       fputs (out, stdout);
       iint_add (count, 1L);     /* cant possibly overflow, should i check? */
@@ -357,9 +364,11 @@ int crook (sudoku * master, dump_struct * dump_structure) {
     if (!dump_structure->stack) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
+      /* LOG guessed_idea, pos val */
     }
     switch (squash (copy, dump_structure)) {
     case 1:
+      /* LOG guess_all_done, pos val */
       val++;
       break;
     case 2:
@@ -368,6 +377,9 @@ int crook (sudoku * master, dump_struct * dump_structure) {
                      dump_structure->buffer + dump_structure->position);
       return 2;
     case -1:
+      /* LOG guess_was_wrong, pos val */
+      /* LOG undo_stuff_since_last_guess */
+      /* LOG must_remove_probable, pos val */
       remove_probable (mc, val);        /* should i check? */
       if (sudoku_cell_to_fill (master, &pos, &dummy) && (dummy > val)) {
         free (copy);
@@ -427,6 +439,7 @@ int main (int argc, char **argv) {
 
   switch (squash (master, &dump_data)) {
   case -1:
+    /* LOG input_idea_wrong */
     fputs ("no solution\n", stderr);
     break;
   case 2:
@@ -441,6 +454,8 @@ int main (int argc, char **argv) {
     }
     free (dump_data.buffer);
   }
+
+  /* LOG master_all_done */
   free (master);
 
   *out = '#';
