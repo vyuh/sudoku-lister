@@ -24,9 +24,11 @@ class cell {
         v = t.v;
     }
     void putIdea(byte idea){
+        // mutation
         v=(short)(idea|open|may_b[idea]);
     }
     void copyin(cell t){
+        // mutation
         v=t.v;
     }
     String txt() { //for non semantic dump. though portable.
@@ -46,7 +48,11 @@ class cell {
         return test_mask(open);
     }
     void reset(short mask) { //reset the mask
+        // mutation
         v&=~mask;
+    }
+    void lock() {
+        reset(open);
     }
     byte value(){ //value of an open or filled cell
         return (byte)(v&data);
@@ -55,7 +61,7 @@ class cell {
         if (may_be(i)) { //has it in probable
             if (!waiting()) return true; // it is the only probable!!
             reset(may_b[i]);
-            v--;
+            v--; // mutation
             if(is_open()) {// only one probable left now
                 for(i=0; i<9; i++) if(may_be(i)) break;
                 putIdea(i);
@@ -195,13 +201,14 @@ class s00d {
 
 
     int hook() { // returns { wrong, stale, solved, dumping } = -1, 0, 1, 2
+        // mutation
         byte x, pos, val;
         while((pos = idea()) < 81) {
             val = i_v[pos].value();
             for(x=0; x<20; x++) {       
                  if(i_v[clr[pos][x]].rm(val)) return -1;
             }
-            i_v[pos].reset(cell.open);
+            i_v[pos].lock();
             if (--left == 0) {
                 System.out.println(toString());
                 n--; if(n==0) return 2;
@@ -210,7 +217,8 @@ class s00d {
         }
         return 0;
     }
-    int crook(){
+    int crook(){ // returns { hint_found, solved_all, dumping } = 0, 1, 2
+        // mutation
         s00d copy;
         cell mc, cc;
         byte pos, val=0;
@@ -239,7 +247,7 @@ class s00d {
         copy = null;
         return 1;
     }
-    int squash(){
+    int squash(){ // returns { wrong, solved_all, dumping } = -1, 1, 2
         int ret;
         do if((ret=hook())!=0) return ret; while (0==(ret=crook()));
         return ret;
@@ -262,6 +270,7 @@ class s00d {
         for(byte i = 0; i<81; i++) i_v[i] = new cell(t.i_v[i]);
     }
     void copyin(s00d t){
+        // mutation
         left = t.left;
         for(byte i = 0; i<81; i++) i_v[i].copyin(t.i_v[i]);
     }
@@ -360,7 +369,7 @@ class list extends s00d implements Iterator<String>, Iterable<String> {
             for(x=0; x<20; x++) {       
                  if(i_v[clr[pos][x]].rm(val)) return -1;
             }
-            i_v[pos].reset(cell.open);
+            i_v[pos].lock();
             if (--left == 0) {
                 nxt.append(toString()+"\n");
                 d++;
