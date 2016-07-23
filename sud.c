@@ -92,13 +92,12 @@ void dump_request (int sig) {
     die ("RAM denied");
   memset (dump_data.buffer, 0, 81 * 414);
 }
-int sudoku_dump (sudoku * s, int p, int v, char * buffer) {
+int sudoku_dump (sudoku * s, int p, int v, char *buffer) {
   char *eye;
   unsigned short *sun;
   int l;
 
-  for (l = 0, eye = buffer, sun = s->i_v; l < 405;
-       sun++, eye += 5)
+  for (l = 0, eye = buffer, sun = s->i_v; l < 405; sun++, eye += 5)
     l += sprintf (eye, "%04x ", (int) *sun);
 
   l += sprintf (eye, "%02x ", (int) s->left);
@@ -107,11 +106,11 @@ int sudoku_dump (sudoku * s, int p, int v, char * buffer) {
   eye += 3;
   l += sprintf (eye, "%02x\n", v);
 
-  return l;                     /* the characters written dump_data.position to be
-                                   incremented outside */
+  return l;                     /* the characters written dump_data.position
+                                   to be incremented outside */
 }
 int dump_struct_free (dump_struct * dump_structure) {
-  sudoku_state * n;
+  sudoku_state *n;
   for (; n >= dump_structure->stack + dump_structure->top; n--)
     free (n->s);
   free (dump_structure->stack);
@@ -132,14 +131,20 @@ int dumpfile_try_read (dump_struct * dump_structure) {
   if (!(dump_structure->buffer = (char *) malloc (81 * 414)))
     die ("RAM denied\n");
   memset (dump_structure->buffer, 0, 81 * 414);
-  depth = fread (dump_structure->buffer, 414, 81, dumpfile);  /* if CRLF & fread doesnt
-                                                   copy the last incomplete
-                                                   line */
+  depth = fread (dump_structure->buffer, 414, 81, dumpfile);    /* if CRLF &
+                                                                   fread
+                                                                   doesnt
+                                                                   copy the
+                                                                   last
+                                                                   incomplete
+                                                                   line */
   fclose (dumpfile);
   if (!depth)
     return 1;
 
-  if (!(dump_structure->stack = (sudoku_state *) malloc (sizeof (sudoku_state) * depth)))
+  if (!
+      (dump_structure->stack =
+       (sudoku_state *) malloc (sizeof (sudoku_state) * depth)))
     die ("RAM denied\n");
   memset (dump_structure->stack, 0, sizeof (sudoku_state) * depth);
 
@@ -314,7 +319,7 @@ int hook (sudoku * puzzle, dump_struct * dump_structure) {
     if (!(--(puzzle->left))) {
       sudoku_to_string (out, puzzle);
       fputs (out, stdout);
-      iint_add (count, 1L);            /* cant possibly overflow, should i check? */
+      iint_add (count, 1L);     /* cant possibly overflow, should i check? */
       if (dump_structure->buffer) {
         dump_structure->position = 0;
         return 2;
@@ -358,10 +363,12 @@ int crook (sudoku * master, dump_struct * dump_structure) {
       val++;
       break;
     case 2:
-      dump_structure->position += sudoku_dump (copy, (int) pos, (int) val, dump_structure->buffer + dump_structure->position);
+      dump_structure->position +=
+        sudoku_dump (copy, (int) pos, (int) val,
+                     dump_structure->buffer + dump_structure->position);
       return 2;
     case -1:
-      remove_probable (mc, val);             /* should i check? */
+      remove_probable (mc, val);        /* should i check? */
       ;
       if (sudoku_cell_to_fill (master, &pos, &dummy) && (dummy > val)) {
         free (copy);
@@ -373,10 +380,8 @@ int crook (sudoku * master, dump_struct * dump_structure) {
   return 1;
 }
 int squash (sudoku * puzzle, dump_struct * dump_structure) {
-  /* TODO the log_struct * log_structure
-   * then probably env_struct * environment
-   * which encapsulates log, dump, count and more
-   */
+  /* TODO the log_struct * log_structure then probably env_struct *
+     environment which encapsulates log, dump, count and more */
   int ret;
   do
     if (ret = hook (puzzle, dump_structure))
@@ -440,7 +445,7 @@ int main (int argc, char **argv) {
   free (master);
 
   *out = '#';
-  iint_to_string (out + 1, count);        /* haha! passing a global :D */
+  iint_to_string (out + 1, count);      /* haha! passing a global :D */
   fputs (out, stderr);
 
   return 0;
