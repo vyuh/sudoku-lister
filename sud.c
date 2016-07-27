@@ -248,7 +248,7 @@ void sudoku_init (char *in, sudoku * puzzle) {
     if ((idea_v = (*in) - '1') < 9) {
       *eye = idea_v | open | may_b[idea_v];
 #ifdef DEBUG
-      fprintf(stderr, "LOG marked_input_idea, cell: %d, value: %d\n", i, idea_v);
+      fprintf(stderr, "LOG sudoku_init: marked_input_idea, cell: %d, value: %d\n", i, idea_v);
 #endif
     }
     else
@@ -288,7 +288,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
     (*eye) &= ~may_b[v];
     (*eye)--;
 #ifdef DEBUG
-    fprintf(stderr, "LOG removed_probable, cell: as_above, value: %d\n", v);
+    fprintf(stderr, "LOG remove_probable: removed_probable, cell: as_above, value: %d\n", v);
 #endif
     if ((*eye) & open) {
       for (v = 0; v < 9; v++)
@@ -296,7 +296,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
           break;
       (*eye) = ((unsigned short) v) | open | may_b[v];
 #ifdef DEBUG
-      fprintf(stderr, "LOG marked_logical_idea, cell: as_above, value: %d\n", v);
+      fprintf(stderr, "LOG remove_probable: marked_logical_idea, cell: as_above, value: %d\n", v);
 #endif
     }
   }
@@ -322,22 +322,22 @@ int hook (sudoku * puzzle, dump_struct * dump_structure) {
   }
   while (sudoku_cell_to_fill (puzzle, &pos, &val)) {
 #ifdef DEBUG
-    fprintf(stderr, "LOG checking_idea, cell: %d, value: %d\n", pos, val);
+    fprintf(stderr, "LOG hook: checking_idea, cell: %d, value: %d\n", pos, val);
 #endif
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
 #ifdef DEBUG
-      fprintf(stderr, "LOG checking_probable, cell: %d, value: %d\n", *eye, val);
+      fprintf(stderr, "LOG hook: checking_probable, cell: %d, value: %d\n", *eye, val);
 #endif
       if (remove_probable (&(puzzle->i_v[*eye]), val))
         return -1;
     }
     puzzle->i_v[pos] &= (~open);
 #ifdef DEBUG
-    fprintf(stderr, "LOG idea_locked, cell: %d, value: %d\n", *eye, val);
+    fprintf(stderr, "LOG hook: idea_locked, cell: %d, value: %d\n", *eye, val);
 #endif
     if (!(--(puzzle->left))) {
 #ifdef DEBUG
-      fprintf(stderr, "LOG a_solution_reached\n");
+      fprintf(stderr, "LOG hook: a_solution_reached\n");
 #endif
       sudoku_to_string (out, puzzle);
       fputs (out, stdout);
@@ -380,13 +380,13 @@ int crook (sudoku * master, dump_struct * dump_structure) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
 #ifdef DEBUG
-      fprintf(stderr, "LOG guessed_idea, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: guessed_idea, cell: %d, value: %d\n", pos, val);
 #endif
     }
     switch (squash (copy, dump_structure)) {
     case 1:
 #ifdef DEBUG
-      fprintf(stderr, "LOG guess_all_done, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: guess_all_done, cell: %d, value: %d\n", pos, val);
 #endif
       val++;
       break;
@@ -397,9 +397,9 @@ int crook (sudoku * master, dump_struct * dump_structure) {
       return 2;
     case -1:
 #ifdef DEBUG
-      fprintf(stderr, "LOG guess_was_wrong, cell: %d, value: %d\n", pos, val);
-      fprintf(stderr, "LOG undo_stuff_since_last_guess\n");
-      fprintf(stderr, "LOG must_remove_probable, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: guess_was_wrong, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: undo_stuff_since_last_guess\n");
+      fprintf(stderr, "LOG crook: must_remove_probable, cell: %d, value: %d\n", pos, val);
 #endif
       remove_probable (mc, val);        /* should i check? */
       if (sudoku_cell_to_fill (master, &pos, &dummy) && (dummy > val)) {
@@ -461,7 +461,7 @@ int main (int argc, char **argv) {
   switch (squash (master, &dump_data)) {
   case -1:
 #ifdef DEBUG
-    fprintf(stderr, "LOG input_idea_wrong, cell: last_checked, value: last_checked\n");
+    fprintf(stderr, "LOG main: input_idea_wrong, cell: last_checked, value: last_checked\n");
 #endif
     fputs ("no solution\n", stderr);
     break;
@@ -478,7 +478,7 @@ int main (int argc, char **argv) {
     free (dump_data.buffer);
   }
 #ifdef DEBUG
-    fprintf(stderr, "LOG master_all_done\n");
+    fprintf(stderr, "LOG main: master_all_done\n");
 #endif
 
   free (master);
