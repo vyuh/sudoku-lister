@@ -247,7 +247,7 @@ void sudoku_init (char *in, sudoku * puzzle) {
   for (i = 0; i < 81 && *in; i++, eye++, in++) {
     if ((idea_v = (*in) - '1') < 9) {
       *eye = idea_v | open | may_b[idea_v];
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG sudoku_init: marked_input_idea, cell: %d, value: %d\n", i, idea_v);
 #endif
     }
@@ -287,7 +287,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
       return 1;
     (*eye) &= ~may_b[v];
     (*eye)--;
-#ifdef DEBUG
+#ifdef LOG
     fprintf(stderr, "LOG remove_probable: removed_current_probable\n");
 #endif
     if ((*eye) & open) {
@@ -295,7 +295,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
         if ((*eye) & may_b[v])
           break;
       (*eye) = ((unsigned short) v) | open | may_b[v];
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG remove_probable: marked_logical_idea, value: %d\n", v);
 #endif
     }
@@ -321,22 +321,22 @@ int hook (sudoku * puzzle, dump_struct * dump_structure) {
     return 1;
   }
   while (sudoku_cell_to_fill (puzzle, &pos, &val)) {
-#ifdef DEBUG
+#ifdef LOG
     fprintf(stderr, "LOG hook: set_current_idea, cell: %d, value: %d\n", pos, val);
 #endif
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG hook: set_current_probable, cell: %d, value: %d\n", *eye, val);
 #endif
       if (remove_probable (&(puzzle->i_v[*eye]), val))
         return -1;
     }
     puzzle->i_v[pos] &= (~open);
-#ifdef DEBUG
+#ifdef LOG
     fprintf(stderr, "LOG hook: lock_current_idea\n");
 #endif
     if (!(--(puzzle->left))) {
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG hook: a_solution_reached\n");
 #endif
       sudoku_to_string (out, puzzle);
@@ -379,13 +379,13 @@ int crook (sudoku * master, dump_struct * dump_structure) {
     if (!dump_structure->stack) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG crook: push_guess, cell: %d, value: %d\n", pos, val);
 #endif
     }
     switch (squash (copy, dump_structure)) {
     case 1:
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG crook: pop_guess\n");
 #endif
       val++;
@@ -396,7 +396,7 @@ int crook (sudoku * master, dump_struct * dump_structure) {
                      dump_structure->buffer + dump_structure->position);
       return 2;
     case -1:
-#ifdef DEBUG
+#ifdef LOG
       fprintf(stderr, "LOG crook: pop_wrong_guess_and_remove_probable, cell: %d, value: %d\n", pos, val);
 #endif
       remove_probable (mc, val);        /* should i check? */
@@ -451,14 +451,16 @@ int main (int argc, char **argv) {
 
   if (signal (SIGINT, dump_request) == SIG_ERR)
     fputs ("could not enable dump feature\n", stderr);
+#ifdef DEBUG
   else
-    fputs ("dump feature enabled\n", stderr);
+    fputs ("DEBUG: dump feature enabled\n", stderr);
+#endif
 
   count = iint_new (10);
 
   switch (squash (master, &dump_data)) {
   case -1:
-#ifdef DEBUG
+#ifdef LOG
     fprintf(stderr, "LOG main: input_idea_wrong, cell: last_checked, value: last_checked\n");
 #endif
     fputs ("no solution\n", stderr);
@@ -474,11 +476,12 @@ int main (int argc, char **argv) {
       fclose (dumpfile);
     }
     free (dump_data.buffer);
-  }
-#ifdef DEBUG
+    break;
+  default:
+#ifdef LOG
     fprintf(stderr, "LOG main: pop_main\n");
 #endif
-
+  }
   free (master);
 
   *out = '#';
