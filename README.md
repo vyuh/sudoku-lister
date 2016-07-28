@@ -6,9 +6,7 @@ constraints of an input sudoku grid.
 EXAMPLES
 --------
 
-    $ cc sud.c #single file having complete source
-    $ ./a.out #press control C to dump state and terminate program
-    $ date>>log; ./a.out;date >>log;tail log #time the computation
+    $ cc sud.c
     $ ./a.out 800000000003600000070090200050007000000045700000100030001000068008500010090000400
 
 USES
@@ -19,57 +17,53 @@ or as a *very* fast sudoku solver/generator.
 
 INPUT
 -----
-input grid is given as a string of 81 bytes as first argument.
-each character represents a cell, in row order.
-all characters except 1-9 are interpreted as empty cells.
-if input string is smaller than 81 characters the rest of the
-cells are assumed to be empty.
+INPUT sudoku grid (a 9x9 matrix) is given as first command line argument.
+Its `char`s represent sudoku cells, in row order. All `char`s except
+`'1'`-`'9'` are interpreted as empty cells. If the argument string is
+smaller than 81 `char`s the rest of the cells are assumed to be empty.
 
 OUTPUT
 ------
-The program lists sudokus in form of 81 character strings.
-*all* of which satisfy the constraints expressed in the input string.
+The program lists *all* sudokus that satisfy the constraints expressed
+in the INPUT sudoku grid, in form of 81 character strings, one on each
+line.
 
-if input string means all empty cells.
-it will list *all* possible sudoku grids
+If INPUT string specifies that all cells are empty (no constraint),
+it will list *all* possible sudoku grids.
 
-if no input string is given.
-it will list all sudokus which have 123456789 as the first row.
-ie. "123456789" is the default first argument.
+"123456789" is the default first argument if none is given.
 
 DUMPING STATE OF COMPUTATION
 ----------------------------
-if too many sudokus satisfy input constraints, then computation
-can take a lot of time.
+If too many sudokus satisfy INPUT constraints, then computation
+(and listing) of *all* solution can take a lot of time (and memory).
 
 The keyboard interrupt signal (Ctrl+C) terminates the program after
-dumping its state to a text file.
-
-if the program is run without arguments and a dumpfile is present in the
-current directory, it loads state from dumpfile and resumes a
-previously suspended computation.
+dumping its state to a text file named `dump` in current directory.
+Later, if the program is run without arguments and a file named
+`dump` is present in the current directory, it tries to load state
+from it and resume a previously suspended computation.
 
 ENUMERATING RESULTS
 -------------------
-the program shows number of sudokus listed in each session.
-i.e. from resume/start to suspension/termination of computation.
-you need to manually add them up if you want to count all listed
-values in whole computation.
-
-the counter will not overflow for any input string.
+The program shows number of sudokus listed in each session on stderr,
+i.e. the number of solutions found from resume/start to
+suspension/termination of computation. You can keep track of them,
+and add them up when required, to count all listed values in whole
+computation. The counter will not overflow for any input string.
 
 PORTABILITY
 -----------
-the source code and any generated dump files are usable on *any*
-platform that has an ANSI C compiler with standard C library
-implemented.
+The source code can be compiled on any platform that has an ANSI C
+compiler with standard C library implemented.
 
-compile it with tiny c compiler. it is a good compiler.
+Generated dump files may have to converted to properly encoded `char`s
+on different platform.
 
 READING THE CODE
 ----------------
-the categorized source code is given in src/ directory.
-src/extra/tut.c is a tutorial aimed at explaining the algorithm.
+Some (very old but working) categorized source code is given in src/
+directory.  src/extra/tut.c is a tutorial tries to explain the algorithm.
 
 
 ME
