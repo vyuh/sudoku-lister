@@ -288,7 +288,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
     (*eye) &= ~may_b[v];
     (*eye)--;
 #ifdef DEBUG
-    fprintf(stderr, "LOG remove_probable: removed_probable, cell: as_above, value: %d\n", v);
+    fprintf(stderr, "LOG remove_probable: removed_current_probable\n");
 #endif
     if ((*eye) & open) {
       for (v = 0; v < 9; v++)
@@ -296,7 +296,7 @@ int remove_probable (unsigned short *eye, unsigned char v) {
           break;
       (*eye) = ((unsigned short) v) | open | may_b[v];
 #ifdef DEBUG
-      fprintf(stderr, "LOG remove_probable: marked_logical_idea, cell: as_above, value: %d\n", v);
+      fprintf(stderr, "LOG remove_probable: marked_logical_idea, value: %d\n", v);
 #endif
     }
   }
@@ -322,18 +322,18 @@ int hook (sudoku * puzzle, dump_struct * dump_structure) {
   }
   while (sudoku_cell_to_fill (puzzle, &pos, &val)) {
 #ifdef DEBUG
-    fprintf(stderr, "LOG hook: checking_idea, cell: %d, value: %d\n", pos, val);
+    fprintf(stderr, "LOG hook: set_current_idea, cell: %d, value: %d\n", pos, val);
 #endif
     for (x = 0, eye = &scope[pos * 20]; x < 20; x++, eye++) {
 #ifdef DEBUG
-      fprintf(stderr, "LOG hook: checking_probable, cell: %d, value: %d\n", *eye, val);
+      fprintf(stderr, "LOG hook: set_current_probable, cell: %d, value: %d\n", *eye, val);
 #endif
       if (remove_probable (&(puzzle->i_v[*eye]), val))
         return -1;
     }
     puzzle->i_v[pos] &= (~open);
 #ifdef DEBUG
-    fprintf(stderr, "LOG hook: idea_locked, cell: %d, value: %d\n", *eye, val);
+    fprintf(stderr, "LOG hook: lock_current_idea\n");
 #endif
     if (!(--(puzzle->left))) {
 #ifdef DEBUG
@@ -380,13 +380,13 @@ int crook (sudoku * master, dump_struct * dump_structure) {
       *copy = *master;
       *cc = (((unsigned short) val) | open | may_b[val]);
 #ifdef DEBUG
-      fprintf(stderr, "LOG crook: guessed_idea, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: push_guess, cell: %d, value: %d\n", pos, val);
 #endif
     }
     switch (squash (copy, dump_structure)) {
     case 1:
 #ifdef DEBUG
-      fprintf(stderr, "LOG crook: guess_all_done, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: pop_guess\n");
 #endif
       val++;
       break;
@@ -397,9 +397,7 @@ int crook (sudoku * master, dump_struct * dump_structure) {
       return 2;
     case -1:
 #ifdef DEBUG
-      fprintf(stderr, "LOG crook: guess_was_wrong, cell: %d, value: %d\n", pos, val);
-      fprintf(stderr, "LOG crook: undo_stuff_since_last_guess\n");
-      fprintf(stderr, "LOG crook: must_remove_probable, cell: %d, value: %d\n", pos, val);
+      fprintf(stderr, "LOG crook: pop_wrong_guess_and_remove_probable, cell: %d, value: %d\n", pos, val);
 #endif
       remove_probable (mc, val);        /* should i check? */
       if (sudoku_cell_to_fill (master, &pos, &dummy) && (dummy > val)) {
@@ -478,7 +476,7 @@ int main (int argc, char **argv) {
     free (dump_data.buffer);
   }
 #ifdef DEBUG
-    fprintf(stderr, "LOG main: master_all_done\n");
+    fprintf(stderr, "LOG main: pop_main\n");
 #endif
 
   free (master);
