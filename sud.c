@@ -450,10 +450,17 @@ int main (int argc, char **argv) {
   }
 
   if (signal (SIGINT, dump_request) == SIG_ERR)
-    fputs ("could not enable dump feature\n", stderr);
+    fputs ("could not enable dump feature for SIGINT\n", stderr);
 #ifdef DEBUG
   else
-    fputs ("DEBUG: dump feature enabled\n", stderr);
+    fputs ("DEBUG: dump feature enabled for SIGINT\n", stderr);
+#endif
+
+  if (signal (SIGPIPE, dump_request) == SIG_ERR)
+    fputs ("could not enable dump feature for SIGPIPE\n", stderr);
+#ifdef DEBUG
+  else
+    fputs ("DEBUG: dump feature enabled for SIGPIPE\n", stderr);
 #endif
 
   count = iint_new (10);
