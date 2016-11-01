@@ -352,6 +352,7 @@ int hook (sudoku * puzzle, dump_struct * dump_structure) {
   }
   return 0;
 }
+int squash (sudoku * puzzle, dump_struct * dump_structure);
 int crook (sudoku * master, dump_struct * dump_structure) {
   sudoku *copy;
   unsigned short *mc, *cc;
