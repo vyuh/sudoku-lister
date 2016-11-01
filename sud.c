@@ -488,6 +488,7 @@ int main (int argc, char **argv) {
 #ifdef LOG
     fprintf(stderr, "LOG main: pop_main\n");
 #endif
+    break;
   }
   free (master);
 
